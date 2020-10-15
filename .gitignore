@@ -19,6 +19,7 @@ intern_tests/
 utils/grid/
 utils/grid_results/
 results/
+archive/
 results_old/
 HILIC/
 develop-eggs/
