@@ -9,7 +9,7 @@ import pandas as pd
 from Bio.SeqUtils.ProtParam import ProteinAnalysis
 from xifaims import const
 from xirt import features as xirtf
-from modlamp.descriptors import PeptideDescriptor, GlobalDescriptor
+from modlamp.descriptors import GlobalDescriptor
 
 
 def only_upper(seq):

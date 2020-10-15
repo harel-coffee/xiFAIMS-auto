@@ -9,7 +9,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-
+def const_line(*args, **kwargs):
+    cvs = np.array([30., 35., 40., 45., 50., 55.,
+                    60., 65., 70., 75., 80., 85., 90.])
+    cvs = cvs * (-1)
+    plt.plot(cvs, cvs, C='k')
+    
+    
 def feature_correlation_plot(features_df, outpath, prefix="", show=False):
     """
     Plot a correlation matrix from the input features.
@@ -47,7 +53,7 @@ def train_test_scatter_plot(all_clf, outpath, prefix="", show=False):
     """PLot a observed vs. pedicted scatter plot."""
     g = sns.FacetGrid(all_clf, col="Set", row="classifier")
     g = g.map(plt.scatter, "CV_Train", "CV_Predict")
-    g = g.map(flib.const_line)
+    g = g.map(const_line)
     g.set(ylim=(-90, -20))
     g.set(xlim=(-90, -20))
     g.set_xlabels("Observed CV")
