@@ -60,19 +60,19 @@ output:
   pi-dimension: 1
   pi-loss: mse
   pi-metrics: mse
-  pi-weight: 10
+  pi-weight: 3
   tmass-activation: linear
   tmass-column: tmass
   tmass-dimension: 1
   tmass-loss: mse
   tmass-metrics: mse
-  tmass-weight: 10
+  tmass-weight: 3
   tmz-activation: linear
   tmz-column: tmz
   tmz-dimension: 1
   tmz-loss: mse
   tmz-metrics: mse
-  tmz-weight: 10
+  tmz-weight: 3
 siamese:
   use: True
   merge_type: add
