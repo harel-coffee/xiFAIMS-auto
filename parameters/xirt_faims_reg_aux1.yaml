@@ -60,7 +60,7 @@ output:
   pi-dimension: 1
   pi-loss: mse
   pi-metrics: mse
-  pi-weight: 10
+  pi-weight: 1
 siamese:
   use: True
   merge_type: add

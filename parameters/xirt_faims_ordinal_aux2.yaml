@@ -54,19 +54,19 @@ output:
   cv-dimension: 18
   cv-loss: binary_crossentropy
   cv-metrics: mse
-  cv-weight: 20
+  cv-weight: 10
   pi-activation: linear
   pi-column: pi
   pi-dimension: 1
   pi-loss: mse
   pi-metrics: mse
-  pi-weight: 10
+  pi-weight: 1
   tmass-activation: linear
   tmass-column: tmass
   tmass-dimension: 1
   tmass-loss: mse
   tmass-metrics: mse
-  tmass-weight: 10
+  tmass-weight: 1
 siamese:
   use: True
   merge_type: add
