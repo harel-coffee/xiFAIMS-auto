@@ -110,6 +110,9 @@ training_data.psms["pi"] = normalize(training_data.psms["pi"])
 training_data.psms["tmass"] = normalize(training_data.psms["exp mass"])
 training_data.psms["tmz"] = normalize(training_data.psms["exp m/z"])
 
+if "reg" in xirt_loc:
+    training_data.psms["cv"] = normalize(training_data.psms["cv"])
+
 # %%
 # init the network
 # pip install jupyter-kite
