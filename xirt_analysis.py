@@ -135,6 +135,9 @@ for train_idx, val_idx, pred_idx in training_data.iter_splits(n_splits=n_splits,
     xv_cv = training_data.get_features(val_idx)
     yv_cv = training_data.get_classes(val_idx, frac_cols=frac_cols, cont_cols=cont_cols)
 
+    xp_cv = training_data.get_features(pred_idx)
+    yp_cv = training_data.get_classes(pred_idx, frac_cols=frac_cols, cont_cols=cont_cols)
+    
     xirtnetwork.build_model(siamese=xirt_params["siamese"]["use"])
     xirtnetwork.compile()
     callbacks = xirtnetwork.get_callbacks(suffix=str(cv_counter).zfill(2))
@@ -155,13 +158,18 @@ for train_idx, val_idx, pred_idx in training_data.iter_splits(n_splits=n_splits,
     if "aux" in xirt_loc:
         predictions_v = xirtnetwork.model.predict(xv_cv)
         predictions_t = xirtnetwork.model.predict(xt_cv)
+        predictions_p = xirtnetwork.model.predict(xp_cv)
 
         predictions_vv, obs_v = converter(predictions_v, yv_cv, xirt_loc)
         predictions_tt, obs_t = converter(predictions_t, yt_cv, xirt_loc)
+        predictions_pp, obs_p = converter(predictions_p, yp_cv, xirt_loc)
+        
         predictions_v[0] = predictions_vv
         predictions_t[0] = predictions_tt
+        predictions_p[0] = predictions_pp
         yv_cv[0] = obs_v
         yt_cv[0] = obs_t
+        yp_cv[0] = obs_p
 
         # store for later
         results["pearsonr"].append(pearsonr(predictions_vv, obs_v)[0])
@@ -170,7 +178,10 @@ for train_idx, val_idx, pred_idx in training_data.iter_splits(n_splits=n_splits,
         results["pearsonr"].append(pearsonr(predictions_tt, obs_t)[0])
         results["r2"].append(results["pearsonr"][-1]**2)
 
-        f, ax = plt.subplots(2, len(all_cols), figsize=(4*len(all_cols), 8))
+        results["pearsonr"].append(pearsonr(predictions_pp, obs_p)[0])
+        results["r2"].append(results["pearsonr"][-1]**2)
+        
+        f, ax = plt.subplots(3, len(all_cols), figsize=(4*len(all_cols), 8))
         for ii, col in enumerate(all_cols):
             prs = np.round(pearsonr(np.ravel(predictions_t[ii]), yt_cv[ii])[0], 2)
             ax[0][ii].scatter(np.ravel(predictions_t[ii]), yt_cv[ii])
@@ -181,15 +192,22 @@ for train_idx, val_idx, pred_idx in training_data.iter_splits(n_splits=n_splits,
             ax[1][ii].scatter(np.ravel(predictions_v[ii]), yv_cv[ii])
             ax[1][ii].set(xlabel="Predicted\nValidation", ylabel="Observerd",
                           title=col + " prs: {}".format(prs))
+            
+            prs = np.round(pearsonr(np.ravel(predictions_p[ii]), yp_cv[ii])[0], 2)
+            ax[2][ii].scatter(np.ravel(predictions_p[ii]), yp_cv[ii])
+            ax[2][ii].set(xlabel="Predicted\nPrediction", ylabel="Observerd",
+                          title=col + " prs: {}".format(prs))            
 
     else:
         # single task
         predictions_v = xirtnetwork.model.predict(xv_cv)
         predictions_t = xirtnetwork.model.predict(xt_cv)
+        predictions_p = xirtnetwork.model.predict(xp_cv)
 
         predictions_v, obs_v = converter([predictions_v], yv_cv, xirt_loc)
         predictions_t, obs_t = converter([predictions_t], yt_cv, xirt_loc)
-
+        predictions_p, obs_p = converter([predictions_p], yp_cv, xirt_loc)
+        
         # validation
         results["pearsonr"].append(pearsonr(predictions_v, obs_v)[0])
         results["r2"].append(results["pearsonr"][-1]**2)
@@ -198,6 +216,10 @@ for train_idx, val_idx, pred_idx in training_data.iter_splits(n_splits=n_splits,
         results["pearsonr"].append(pearsonr(predictions_t, obs_t)[0])
         results["r2"].append(results["pearsonr"][-1]**2)
 
+        # train
+        results["pearsonr"].append(pearsonr(predictions_p, obs_p)[0])
+        results["r2"].append(results["pearsonr"][-1]**2)
+        
         f, ax = plt.subplots(2, len(all_cols), figsize=(4*len(all_cols), 8))
         # train
         prs = np.round(results["pearsonr"][-1], 2)
@@ -209,9 +231,15 @@ for train_idx, val_idx, pred_idx in training_data.iter_splits(n_splits=n_splits,
         ax[1].set(xlabel="Predicted\nValidation",
                   ylabel="Observerd", title="cv prs: {}".format(prs))
 
+        prs = np.round(results["pearsonr"][-2], 2)
+        ax[2].scatter(predictions_v, obs_v)
+        ax[2].set(xlabel="Predicted\nPrediction",
+                  ylabel="Observerd", title="cv prs: {}".format(prs))
+        
     results["split"].append("validation")
     results["split"].append("training")
-    results["yaml"].extend([basename]*2)
+    results["split"].append("prediction")
+    results["yaml"].extend([basename]*3)
 
     sns.despine()
     plt.tight_layout()
