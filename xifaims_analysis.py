@@ -52,21 +52,25 @@ df_DX_features = df_DX_features.drop(drop_features, axis=1)
 xpl.feature_correlation_plot(df_TT_features, dir_res, prefix="TT_")
 
 # train baseline
-svm_options = {"jobs": 8}
-svm_predictions, svm_metric, svm_gs, svm_clf = xml.training(df_TT, df_TT_features, model="SVR", 
+svm_options = {"jobs": 8, "type": "SVC"}
+svm_predictions, svm_metric, svm_gs, svm_clf = xml.training(df_TT, df_TT_features, model="SVM",
+                                                            scale=True, model_args=svm_options)
+
+svm_options = {"jobs": 8, "type": "SVR"}
+svr_predictions, svr_metric, svr_gs, svr_clf = xml.training(df_TT, df_TT_features, model="SVM",
                                                             scale=True, model_args=svm_options)
 
 xgb_options = {"grid": "tiny", "jobs": 8}
-xgb_predictions, xgb_metric, xgb_gs, xgb_clf = xml.training(df_TT, df_TT_features, model="XGB", 
+xgb_predictions, xgb_metric, xgb_gs, xgb_clf = xml.training(df_TT, df_TT_features, model="XGB",
                                                             scale=True, model_args=xgb_options)
 
-FNN_options = {}
-FNN_predictions, fnn_metric, fnn_gs, fnn_clf = xml.training(df_TT, df_TT_features, model="FNN", 
+FNN_options = {"grid": "tiny"}
+FNN_predictions, fnn_metric, fnn_gs, fnn_clf = xml.training(df_TT, df_TT_features, model="FNN",
                                                             scale=True, model_args=FNN_options)
 # concat to one dataframe for easier plotting
 all_clf = pd.concat([svm_predictions, xgb_predictions, FNN_predictions])
 all_clf["run"] = prefix
-all_metrics = pd.concat([svm_metric, xgb_metric])
+all_metrics = pd.concat([svm_metric, xgb_metric, fnn_metric])
 
 print ("QC Plots")
 xpl.train_test_scatter_plot(all_clf, dir_res)
