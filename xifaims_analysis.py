@@ -106,12 +106,12 @@ svr_predictions, svr_metric, svr_gs, svr_clf = xml.training(df_TT, df_TT_feature
 # regression
 print("XGB Regression ...")
 xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBR"}
-xgb_predictions, xgb_metric, xgb_gs, xgb_clf = xml.training(df_TT, df_TT_features, model="XGB",
+xgbr_predictions, xgbr_metric, xgbr_gs, xgbr_clf = xml.training(df_TT, df_TT_features, model="XGB",
                                                             scale=True, model_args=xgb_options)
 # classification
 print("XGB classification ...")
-xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBR"}
-xgb_predictions, xgb_metric, xgb_gs, xgb_clf = xml.training(df_TT, df_TT_features, model="XGB",
+xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBC"}
+xgbc_predictions, xgbc_metric, xgbc_gs, xgbc_clf = xml.training(df_TT, df_TT_features, model="XGB",
                                                             scale=True, model_args=xgb_options)
 
 # classification
@@ -122,13 +122,13 @@ FNN_predictions, fnn_metric, fnn_gs, fnn_clf = xml.training(df_TT, df_TT_feature
 
 # %% organize results
 # concat to one dataframe for easier plotting
-all_clf = pd.concat([svm_predictions, svr_predictions, xgb_predictions, FNN_predictions])
+all_clf = pd.concat([svm_predictions, svr_predictions, xgbr_predictions, xgbc_predictions, FNN_predictions])
 all_clf["run"] = prefix
 all_clf["config"] = config_loc
 all_clf["infile"] = infile_loc
 all_clf["run"] = prefix
 
-all_metrics = pd.concat([svm_metric,svr_metric, xgb_metric, fnn_metric])
+all_metrics = pd.concat([svm_metric,svr_metric, xgbr_metric, xgbc_metric, fnn_metric])
 all_metrics["config"] = config_loc
 all_metrics["infile"] = infile_loc
 all_metrics["run"] = prefix
@@ -139,6 +139,8 @@ res_df = summarize_df(all_clf)
 all_clf.to_csv(os.path.join(dir_res, "{}_summary_CV.csv".format(prefix)))
 all_metrics.to_csv(os.path.join(dir_res, "{}_all_metrics.csv".format(prefix)))
 res_df.to_csv(os.path.join(dir_res, "{}_summary_predictions.csv".format(prefix)))
+print(config)
+print(dir_res)
 print("Done.")
 
 # print ("QC Plots")
