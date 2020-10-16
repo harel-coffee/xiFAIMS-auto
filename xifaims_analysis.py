@@ -56,6 +56,7 @@ config_loc = "parameters/faims_structure.yaml"
 prefix = os.path.basename(config_loc.split(".")[0]) + "-" + os.path.basename(infile_loc.replace(".csv", ""))
 config = yaml.load(open(config_loc), Loader=yaml.FullLoader)
 #config["grid"] = "large"
+config["jobs"] = int(config["jobs"])
 print(config)
 dir_res = os.path.join("../results", prefix)
 if not os.path.exists(dir_res):
@@ -92,24 +93,24 @@ xpl.feature_correlation_plot(df_TT_features, dir_res, prefix="TT_")
 # train baseline
 # classifier
 print("SVM ...")
-svm_options = {"jobs": config["grid"], "type": "SVC"}
+svm_options = {"jobs": config["jobs"], "type": "SVC"}
 svm_predictions, svm_metric, svm_gs, svm_clf = xml.training(df_TT, df_TT_features, model="SVM",
                                                             scale=True, model_args=svm_options)
 
 # regression
 print("SVR ...")
-svm_options = {"jobs": config["grid"], "type": "SVR"}
+svm_options = {"jobs": config["jobs"], "type": "SVR"}
 svr_predictions, svr_metric, svr_gs, svr_clf = xml.training(df_TT, df_TT_features, model="SVM",
                                                             scale=True, model_args=svm_options)
 
 # regression
 print("XGB Regression ...")
-xgb_options = {"grid": config["grid"], "jobs": config["grid"], "type": "XGBR"}
+xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBR"}
 xgb_predictions, xgb_metric, xgb_gs, xgb_clf = xml.training(df_TT, df_TT_features, model="XGB",
                                                             scale=True, model_args=xgb_options)
 # classification
 print("XGB classification ...")
-xgb_options = {"grid": config["grid"], "jobs": config["grid"], "type": "XGBR"}
+xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBR"}
 xgb_predictions, xgb_metric, xgb_gs, xgb_clf = xml.training(df_TT, df_TT_features, model="XGB",
                                                             scale=True, model_args=xgb_options)
 
