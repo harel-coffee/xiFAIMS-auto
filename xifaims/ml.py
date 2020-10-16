@@ -268,6 +268,7 @@ def XGB_model(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "grid": "
         DESCRIPTION.
 
     """
+    print("setting params")
     if model_args["grid"] == "small":
         parameters = {'n_estimators': [50, 150, 250, 25],
                       'max_depth': [3, 6, 9, 12],
@@ -286,23 +287,21 @@ def XGB_model(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "grid": "
                       'nthread': [1],
                       'seed': [42]}
     else:
-        parameters = {'n_estimators': [30, 50, 70, 100, 150, 200, 300],
+        parameters = {'n_estimators': [30, 50, 100],
                       'max_depth': [3, 5, 7, 9],
-                      'min_child_weight': [0.001, 0.1, 1, 5, 10, 20],
-                      'min_samples_split': [1, 2, 5, 10, 20, 30],
-                      'num_leaves': [15, 35, 50, 75, 100, 150],
-                      'gamma': [0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
-                      'min_samples_leaf': [1, 2, 5, 10, 20, 30],
-                      'min_child_samples': [2, 7, 15, 25, 45],
-                      'min_split_gain': [0, 0.001, 0.1, 1, 5, 20],
-                      'max_features': range(10, 25, 3),
-                      'subsample': [i/10 for i in range(4, 10)],
-                      'colsample_bytree': [i/10 for i in range(4, 10)],
-                      'feature_fraction': [i/10 for i in range(4, 10)],
-                      'reg_alpha': [1e-5, 1e-2, 0.1, 1, 25, 100],
-                      'reg_lambda': [1e-5, 1e-2, 0.1, 1, 25, 100],
+                      'min_child_weight': [0.001, 0.1, 1],
+                      'min_samples_split': [1, 2, 5, 10],
+                      'num_leaves': [15, 35, 50],
+                      'gamma': [0.0, 0.1, 0.2, 0.3],
+                      'min_samples_leaf': [1,5, 10, 30],
+                      'min_child_samples': [2, 7, 15],
+                      'min_split_gain': [0.001, 0.1, 1],
+                      'max_features': range(3, 15, 3),
+                      'reg_alpha': [1e-5, 1e-2, 0.1],
+                      'reg_lambda': [1e-5, 1e-2, 0.1],
                       'nthread': [1],
                       'seed': [42]}
+    print("done!")
     # xgb model and grid search
     if model_args["type"] == "XGBR":
         xgb_clf = xgboost.XGBRegressor
