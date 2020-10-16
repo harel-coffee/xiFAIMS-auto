@@ -4,3 +4,4 @@ charge: all
 prefix: all_features
 exclude: ["proline", "DE", "KR", "log10mass", "Glycine"]
 include: []
+grid: "tiny"

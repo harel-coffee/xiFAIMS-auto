@@ -217,13 +217,14 @@ def create_model(n1, d1, lr, epochs=100, batch_size=32, input_dim=29):
 
 def FAIMSNETNN_model(train_df, train_y, val_df, val_y, model_args, cv=3):
     """FIT neuralnetwork model."""
-    if model_args["grid"] == "small":
+    input_dim = train_df.shape[1]
+    if model_args["grid"] == "tiny":
+        param_grid = {"n1": [100], "d1": [0.3, 0.1], "lr": [0.001, 0.01], "epochs": [50],
+                      "batch_size": [32, 128], "input_dim": [input_dim]}        
+    else:
         param_grid = {"n1": [100, 200, 500, 1000], "d1": [0.5, 0.3, 0.15, 0.1],
                       "lr": [0.0001, 0.001, 0.01, 0.1], "epochs": [50],
-                      "batch_size": [16, 32, 64, 128]}
-    else:
-        param_grid = {"n1": [100], "d1": [0.3, 0.1], "lr": [0.001, 0.01], "epochs": [50],
-                      "batch_size": [32, 128]}
+                      "batch_size": [16, 32, 64, 128], "input_dim": [input_dim]}
         
     model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=create_model, verbose=0)
 

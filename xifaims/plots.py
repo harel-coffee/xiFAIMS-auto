@@ -13,7 +13,7 @@ def const_line(*args, **kwargs):
     cvs = np.array([30., 35., 40., 45., 50., 55.,
                     60., 65., 70., 75., 80., 85., 90.])
     cvs = cvs * (-1)
-    plt.plot(cvs, cvs, C='k')
+    plt.plot(cvs, cvs, c='k')
     
     
 def feature_correlation_plot(features_df, outpath, prefix="", show=False):

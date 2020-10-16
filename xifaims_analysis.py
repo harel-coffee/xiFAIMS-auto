@@ -9,23 +9,14 @@ import pandas as pd
 import yaml
 import sys
 
+import seaborn as sns
 from xifaims import processing as xp
 from xifaims import features as xf
 from xifaims import plots as xpl
 from xifaims import ml as xml
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, accuracy_score
 from scipy.stats import pearsonr
-
-# setup
-# scale = True
-# nonunique = True
-# charge = "all"
-# prefix = "all_features"
-# exclude = []
-# include = []
-
-#config_loc = sys.argv[1]
-#infile_loc = sys.argv[2]
+import matplotlib.pyplot as plt
 
 
 def summarize_df(all_clf):
@@ -44,13 +35,29 @@ def summarize_df(all_clf):
     res_df = res_df.sort_values(by=["clf", "set", "pearson"])
     return res_df
 #%%
+# setup
+# scale = True
+# nonunique = True
+# charge = "all"
+# prefix = "all_features"
+# exclude = []
+# include = []
+
+config_loc = sys.argv[1]
+infile_loc = sys.argv[2]
+
 # parsing and options
-infile_loc = "data/4PM_DSS_LS_nonunique1pCSM.csv"
-config_loc = "parameters/faims_all.yaml"
+# infile_loc = "data/4PM_DSS_LS_nonunique1pCSM.csv"
+# config_loc = "parameters/faims_all.yaml"
+# config_loc = "parameters/faims_minimal.yaml"
+# config_loc = "parameters/faims_structure.yaml"
+
+#%%
 prefix = os.path.basename(config_loc.split(".")[0]) + "-" + os.path.basename(infile_loc.replace(".csv", ""))
 config = yaml.load(open(config_loc), Loader=yaml.FullLoader)
+#config["grid"] = "large"
 print(config)
-dir_res = os.path.join("results", prefix)
+dir_res = os.path.join("../results", prefix)
 if not os.path.exists(dir_res):
     os.makedirs(dir_res)
 ############################################################
@@ -77,6 +84,9 @@ df_DX_features = xf.compute_features(df_DX)
 df_TT_features = df_TT_features.drop(config["exclude"], axis=1)
 df_DX_features = df_DX_features.drop(config["exclude"], axis=1)
 
+df_TT_features = df_TT_features[config["include"]]
+df_DX_features = df_DX_features[config["include"]]
+
 xpl.feature_correlation_plot(df_TT_features, dir_res, prefix="TT_")
 #%%
 # train baseline
@@ -94,25 +104,25 @@ svr_predictions, svr_metric, svr_gs, svr_clf = xml.training(df_TT, df_TT_feature
 
 # classification
 print("XGB ...")
-xgb_options = {"grid": "tiny", "jobs": 1}
+xgb_options = {"grid": config["grid"], "jobs": 1}
 xgb_predictions, xgb_metric, xgb_gs, xgb_clf = xml.training(df_TT, df_TT_features, model="XGB",
                                                             scale=True, model_args=xgb_options)
 
 # classification
 print("FNN ...")
-FNN_options = {"grid": "tiny"}
+FNN_options = {"grid": config["grid"]}
 FNN_predictions, fnn_metric, fnn_gs, fnn_clf = xml.training(df_TT, df_TT_features, model="FNN",
                                                             scale=True, model_args=FNN_options)
 
 # %% organize results
 # concat to one dataframe for easier plotting
-all_clf = pd.concat([svm_predictions, xgb_predictions, FNN_predictions])
+all_clf = pd.concat([svm_predictions, svr_predictions, xgb_predictions, FNN_predictions])
 all_clf["run"] = prefix
 all_clf["config"] = config_loc
 all_clf["infile"] = infile_loc
 all_clf["run"] = prefix
 
-all_metrics = pd.concat([svm_metric, xgb_metric, fnn_metric])
+all_metrics = pd.concat([svm_metric,svr_metric, xgb_metric, fnn_metric])
 all_metrics["config"] = config_loc
 all_metrics["infile"] = infile_loc
 all_metrics["run"] = prefix
@@ -128,3 +138,15 @@ print("Done.")
 # print ("QC Plots")
 # xpl.train_test_scatter_plot(all_clf, dir_res)
 # xpl.cv_performance_plot(all_metrics, dir_res)
+
+
+feature_important = xgb_clf.get_booster().get_score(importance_type='weight')
+keys = list(feature_important.keys())
+values = list(feature_important.values())
+
+data = pd.DataFrame(data=values, index=keys, columns=["score"]).sort_values(by = "score", ascending=False)
+data.plot(kind='barh')
+plt.tight_layout()
+sns.despine()
+plt.savefig(os.path.join(dir_res, "{}_feature_importance.png".format(prefix)))
+plt.clf()

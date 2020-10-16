@@ -10,6 +10,12 @@ from Bio.SeqUtils.ProtParam import ProteinAnalysis
 from xifaims import const
 from xirt import features as xirtf
 from modlamp.descriptors import GlobalDescriptor
+from pyteomics import electrochem
+
+
+def get_electrochem_charge(peptide, pH=2.8):
+    """Compute charge using pyteomics."""
+    return electrochem.charge(peptide, pH=pH)
 
 
 def only_upper(seq):
@@ -73,33 +79,31 @@ def compute_features(df):
     df_features["mass"] = df["exp mass"]
     df_features["log10mass"] = np.log10(df["exp mass"])
     df_features["p.charge"] = df["exp charge"]
-    df_features["DE"] = df["seq1seq2"].str.count(
-        "D") + df["seq1seq2"].str.count("E")
-    df_features["KR"] = df["seq1seq2"].str.count(
-        "K") + df["seq1seq2"].str.count("R")
+    df_features["DE"] = df["seq1seq2"].str.count("D") + df["seq1seq2"].str.count("E")
+    df_features["KR"] = df["seq1seq2"].str.count("K") + df["seq1seq2"].str.count("R")
     df_features["aromatics"] = df["seq1seq2"].str.count("F") + \
         df["seq1seq2"].str.count("W") + df["seq1seq2"].str.count("Y")
 
     df_features["proline"] = df["seq1seq2"].str.count("P")
     df_features["Glycine"] = df["seq1seq2"].str.count("G")
 
+    # charge
+    df_features["charge_cmp"] = df["seq1seq2"].apply(get_electrochem_charge)
+    
     # biopython
-    df_features["helix"] = df["seq1seq2"].apply(
-        get_structure_perc, args=("helix",))
-    df_features["sheet"] = df["seq1seq2"].apply(
-        get_structure_perc, args=("sheet",))
-    df_features["turn"] = df["seq1seq2"].apply(
-        get_structure_perc, args=("turn",))
+    df_features["helix"] = df["seq1seq2"].apply(get_structure_perc, args=("helix",))
+    df_features["sheet"] = df["seq1seq2"].apply(get_structure_perc, args=("sheet",))
+    df_features["turn"] = df["seq1seq2"].apply(get_structure_perc, args=("turn",))
     df_features["pi"] = df["seq1seq2"].apply(xirtf.get_pi)
 
     # modlamp features
     seqs = [only_upper(i) for i in df["seq1seq2"]]
     glob = GlobalDescriptor(seqs)
 
-    glob.calculate_charge(ph=7.4, amide=True)
-    df_features["calculate_charge"] = np.ravel(glob.descriptor)
+    glob.calculate_charge(ph=2.8, amide=True)
+    df_features["charge_glob"] = np.ravel(glob.descriptor)
 
-    glob.charge_density(ph=7.4, amide=True)
+    glob.charge_density(ph=2.8, amide=True)
     df_features["charge_density"] = np.ravel(glob.descriptor)
 
     glob.hydrophobic_ratio()

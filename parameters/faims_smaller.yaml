@@ -1,0 +1,18 @@
+scale: True
+nonunique: True
+charge: all
+prefix: smaller
+exclude: []
+include: ["length1", "length2", "mass", "p.charge", "pi", "charge_density", "charge_cmp", "polarity_sum", "estatic_sum", "m/z"]
+grid: "tiny"
+
+
+# Index(['length1', 'length2', 'length1+length2', 'mass', 'p.charge',
+       # 'aromatics', 'charge_cmp', 'helix', 'sheet', 'turn', 'pi',
+       # 'charge_glob', 'charge_density', 'hydrophobic_ratio',
+       # 'intrinsic_size_sum', 'intrinsic_size_std', 'intrinsic_size_max',
+       # 'mv_sum', 'mv_size_std', 'mv_size_max', 'polarity_sum',
+       # 'polarity_size_std', 'polarity_size_max', 'secondstruc_sum',
+       # 'secondstruc_size_std', 'secondstruc_size_max', 'estatic_sum',
+       # 'sstatic_size_std', 'static_size_max', 'm/z'],
+      # dtype='object')
