@@ -277,13 +277,13 @@ def XGB_model(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "grid": "
                       'colsample_bytree': [0.7],
                       'min_child_weight': [1, 3],
                       'gamma': [0.0],
-                      'nthread': [model_args["jobs"]],
+                      'nthread': [1],
                       'seed': [42]}
 
     elif model_args["grid"] == "tiny":
         parameters = {'n_estimators': [10, 50, 100],
                       'learning_rate': [0.001, 0.01, 0.1, 0.3],
-                      'nthread': [model_args["jobs"]],
+                      'nthread': [1],
                       'seed': [42]}
     else:
         parameters = {'n_estimators': [30, 50, 70, 100, 150, 200, 300],
@@ -301,7 +301,7 @@ def XGB_model(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "grid": "
                       'feature_fraction': [i/10 for i in range(4, 10)],
                       'reg_alpha': [1e-5, 1e-2, 0.1, 1, 25, 100],
                       'reg_lambda': [1e-5, 1e-2, 0.1, 1, 25, 100],
-                      'nthread': [model_args["jobs"]],
+                      'nthread': [1],
                       'seed': [42]}
     # xgb model and grid search
     if model_args["type"] == "XGBR":
