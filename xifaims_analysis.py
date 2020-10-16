@@ -56,7 +56,7 @@ infile_loc = sys.argv[2]
 prefix = os.path.basename(config_loc.split(".")[0]) + "-" + os.path.basename(infile_loc.replace(".csv", ""))
 config = yaml.load(open(config_loc), Loader=yaml.FullLoader)
 config["grid"] = "large"
-config["jobs"] = int(config["jobs"])
+config["jobs"] = 40
 print(config)
 dir_res = os.path.join("results", prefix)
 if not os.path.exists(dir_res):
