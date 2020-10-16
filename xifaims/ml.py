@@ -126,22 +126,22 @@ def format_summary(train_df, val_df, train_y, val_y, clf, clf_name, gs):
     return df_results, cv_res
 
 
-def mle_feature_selection():
-    """Feature selectionw rapper using sequential forward selection from MLE."""
-    # feature selection
-    xgbr = xgboost.XGBRFRegressor(**xgbr1.get_params())
+# def mle_feature_selection():
+#     """Feature selectionw rapper using sequential forward selection from MLE."""
+#     # feature selection
+#     xgbr = xgboost.XGBRFRegressor(**xgbr1.get_params())
 
-    sfs = SFS(xgbr, k_features=8, forward=True,
-              floating=False, scoring='neg_mean_squared_error', cv=3, n_jobs=-1)
-    sfs = sfs.fit(train_df, train_y)
+#     sfs = SFS(xgbr, k_features=8, forward=True,
+#               floating=False, scoring='neg_mean_squared_error', cv=3, n_jobs=-1)
+#     sfs = sfs.fit(train_df, train_y)
 
-    features = pd.DataFrame.from_dict(sfs.get_metric_dict()).T
-    print(features)
+#     features = pd.DataFrame.from_dict(sfs.get_metric_dict()).T
+#     print(features)
 
-    fig1 = plot_sfs(sfs.get_metric_dict(), kind='std_dev')
-    plt.title('Sequential Forward Selection (w. StdDev)')
-    plt.grid()
-    plt.show()
+#     fig1 = plot_sfs(sfs.get_metric_dict(), kind='std_dev')
+#     plt.title('Sequential Forward Selection (w. StdDev)')
+#     plt.grid()
+#     plt.show()
 
 
 def SVR_baseline(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "type": "SVC"}, cv=3):
@@ -244,7 +244,8 @@ def FAIMSNETNN_model(train_df, train_y, val_df, val_y, model_args, cv=3):
     return df_results, cv_res, gs, model
 
 
-def XGB_model(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "grid": "small"}, cv=3):
+def XGB_model(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "grid": "small",
+                                                            "type": "XGBC"}, cv=3):
     """
     Fits XGB model with exhaustive parameter optimization.
 
@@ -303,17 +304,25 @@ def XGB_model(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "grid": "
                       'nthread': [model_args["jobs"]],
                       'seed': [42]}
     # xgb model and grid search
-    xgbr = xgboost.XGBRegressor()
-    gs = GridSearchCV(estimator=xgbr, param_grid=parameters, cv=cv, n_jobs=1,
-                      verbose=1, scoring="neg_mean_squared_error", return_train_score=True)
+    if model_args["type"] == "XGBR":
+        xgb_clf = xgboost.XGBRegressor
+        scoring = "neg_mean_squared_error"
+    
+    elif model_args["type"] == "XGBC":
+        xgb_clf = xgboost.XGBClassifier
+        scoring = "accuracy"
+        
+    xgbr = xgb_clf()
+    gs = GridSearchCV(estimator=xgbr, param_grid=parameters, cv=cv, n_jobs=-1,
+                      verbose=1, scoring=scoring, return_train_score=True)
     gs.fit(train_df, train_y)
 
     # refit clf
-    xgbr = xgboost.XGBRegressor(**gs.best_params_)
+    xgbr = xgb_clf(**gs.best_params_)
     xgbr.fit(train_df, train_y)
 
-    df_results, cv_res = format_summary(
-        train_df, val_df, train_y, val_y, xgbr, "XGB", gs)
+    df_results, cv_res = format_summary(train_df, val_df, train_y, val_y, xgbr, model_args["type"], 
+                                        gs)
     cv_res["params"] = str(gs.best_params_)
     return df_results, cv_res, gs, xgbr
 

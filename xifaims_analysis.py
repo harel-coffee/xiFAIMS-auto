@@ -47,10 +47,10 @@ config_loc = sys.argv[1]
 infile_loc = sys.argv[2]
 
 # parsing and options
-# infile_loc = "data/4PM_DSS_LS_nonunique1pCSM.csv"
-# config_loc = "parameters/faims_all.yaml"
-# config_loc = "parameters/faims_minimal.yaml"
-# config_loc = "parameters/faims_structure.yaml"
+infile_loc = "data/4PM_DSS_LS_nonunique1pCSM.csv"
+config_loc = "parameters/faims_all.yaml"
+config_loc = "parameters/faims_minimal.yaml"
+config_loc = "parameters/faims_structure.yaml"
 
 #%%
 prefix = os.path.basename(config_loc.split(".")[0]) + "-" + os.path.basename(infile_loc.replace(".csv", ""))
@@ -102,9 +102,14 @@ svm_options = {"jobs": 8, "type": "SVR"}
 svr_predictions, svr_metric, svr_gs, svr_clf = xml.training(df_TT, df_TT_features, model="SVM",
                                                             scale=True, model_args=svm_options)
 
+# regression
+print("XGB Regression ...")
+xgb_options = {"grid": config["grid"], "jobs": 1, "type": "XGBR"}
+xgb_predictions, xgb_metric, xgb_gs, xgb_clf = xml.training(df_TT, df_TT_features, model="XGB",
+                                                            scale=True, model_args=xgb_options)
 # classification
-print("XGB ...")
-xgb_options = {"grid": config["grid"], "jobs": 1}
+print("XGB classification ...")
+xgb_options = {"grid": config["grid"], "jobs": 1, "type": "XGBR"}
 xgb_predictions, xgb_metric, xgb_gs, xgb_clf = xml.training(df_TT, df_TT_features, model="XGB",
                                                             scale=True, model_args=xgb_options)
 
