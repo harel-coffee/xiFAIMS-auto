@@ -167,7 +167,7 @@ def SVR_baseline(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "type"
         DESCRIPTION.
 
     """
-    tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4], 'C': [1, 10, 100, 1000]},
+    tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e2, 1e-3, 1e-4], 'C': [1, 10, 100, 1000]},
                         {'kernel': ['linear'], 'C': [1, 10, 100, 1000]}]
     # grid search
     if model_args["type"] == "SVC":
@@ -219,7 +219,7 @@ def FAIMSNETNN_model(train_df, train_y, val_df, val_y, model_args, cv=3):
     """FIT neuralnetwork model."""
     input_dim = train_df.shape[1]
     if model_args["grid"] == "tiny":
-        param_grid = {"n1": [100], "d1": [0.3, 0.1], "lr": [0.001, 0.01], "epochs": [50],
+        param_grid = {"n1": [100], "d1": [0.3, 0.1], "lr": [0.001, 0.01], "epochs": [50, 100],
                       "batch_size": [32, 128], "input_dim": [input_dim]}        
     else:
         param_grid = {"n1": [100, 200, 500, 1000], "d1": [0.5, 0.3, 0.15, 0.1],
@@ -233,7 +233,7 @@ def FAIMSNETNN_model(train_df, train_y, val_df, val_y, model_args, cv=3):
     gsresults = gs.fit(train_df, train_y)
 
     # history = model.fit(train_df, train_y, validation_split=0.1, epochs=200, batch_size=16)
-
+    print(gs.best_params_)
     gs.best_params_["epochs"] = 100
     model = create_model(**gs.best_params_)
     history = model.fit(train_df, train_y, validation_split=0.1, epochs=gs.best_params_["epochs"],

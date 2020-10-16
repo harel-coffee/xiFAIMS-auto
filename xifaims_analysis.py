@@ -46,19 +46,19 @@ def summarize_df(all_clf):
 config_loc = sys.argv[1]
 infile_loc = sys.argv[2]
 
-# parsing and options
-infile_loc = "data/4PM_DSS_LS_nonunique1pCSM.csv"
-config_loc = "parameters/faims_all.yaml"
-config_loc = "parameters/faims_minimal.yaml"
-config_loc = "parameters/faims_structure.yaml"
+# # parsing and options
+# infile_loc = "data/4PM_DSS_LS_nonunique1pCSM.csv"
+# config_loc = "parameters/faims_all.yaml"
+# config_loc = "parameters/faims_minimal.yaml"
+# config_loc = "parameters/faims_structure.yaml"
 
 #%%
 prefix = os.path.basename(config_loc.split(".")[0]) + "-" + os.path.basename(infile_loc.replace(".csv", ""))
 config = yaml.load(open(config_loc), Loader=yaml.FullLoader)
-#config["grid"] = "large"
+config["grid"] = "large"
 config["jobs"] = int(config["jobs"])
 print(config)
-dir_res = os.path.join("../results", prefix)
+dir_res = os.path.join("results", prefix)
 if not os.path.exists(dir_res):
     os.makedirs(dir_res)
 ############################################################
@@ -148,7 +148,7 @@ print("Done.")
 # xpl.cv_performance_plot(all_metrics, dir_res)
 
 
-feature_important = xgb_clf.get_booster().get_score(importance_type='weight')
+feature_important = xgbr_clf.get_booster().get_score(importance_type='weight')
 keys = list(feature_important.keys())
 values = list(feature_important.values())
 
