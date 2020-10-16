@@ -161,7 +161,7 @@ for train_idx, val_idx, pred_idx in training_data.iter_splits(n_splits=n_splits,
                                     verbose=1, callbacks=callbacks)
 
     # aux has multiple output variables which requires looping for plotting
-    if "aux" in xirt_loc:
+    if "aux0" not in xirt_loc:
         predictions_v = xirtnetwork.model.predict(xv_cv)
         predictions_t = xirtnetwork.model.predict(xt_cv)
         predictions_p = xirtnetwork.model.predict(xp_cv)
