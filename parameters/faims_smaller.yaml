@@ -2,6 +2,7 @@ scale: True
 nonunique: True
 charge: all
 prefix: smaller
+jobs: -1
 exclude: []
 include: ["length1", "length2", "mass", "p.charge", "pi", "charge_density", "charge_cmp", "polarity_sum", "estatic_sum", "m/z"]
 grid: "tiny"

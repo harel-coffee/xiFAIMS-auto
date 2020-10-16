@@ -3,6 +3,7 @@ nonunique: True
 charge: all
 prefix: minimal
 exclude: []
+jobs: -1
 include: ["mass", "m/z", "p.charge"]
 grid: "tiny"
 

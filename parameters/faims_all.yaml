@@ -2,6 +2,7 @@ scale: True
 nonunique: True
 charge: all
 prefix: all_features
+jobs: -1
 exclude: ["proline", "DE", "KR", "log10mass", "Glycine"]
 include: []
 grid: "tiny"

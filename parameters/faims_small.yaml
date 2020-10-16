@@ -2,6 +2,7 @@ scale: True
 nonunique: True
 charge: all
 prefix: small
+jobs: -1
 exclude: []
 include: ["length1", "length2", "mass", "m/z", "p.charge", "pi"]
 grid: "tiny"

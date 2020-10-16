@@ -2,6 +2,7 @@ scale: True
 nonunique: True
 charge: all
 prefix: structure
+jobs: -1
 exclude: []
 include: ["length1", "length2", "mass", "charge_cmp", "m/z", "pi", "charge_density", 'aromatics', 'helix', 'sheet', 'turn', 'secondstruc_sum', 'secondstruc_size_std', 'secondstruc_size_max']
 grid: "tiny"
