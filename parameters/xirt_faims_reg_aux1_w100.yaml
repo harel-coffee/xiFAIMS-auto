@@ -48,12 +48,13 @@ learning:
   verbose: 1
   optimizer: adam
 output:
-  cv-activation: sigmoid
-  cv-column: cv_ordinal
-  cv-dimension: 18
-  cv-loss: binary_crossentropy
+  callback-path: data/results/callbacks/
+  cv-activation: linear
+  cv-column: cv
+  cv-dimension: 1
+  cv-loss: mse
   cv-metrics: mse
-  cv-weight: 1
+  cv-weight: 100
   pi-activation: linear
   pi-column: pi
   pi-dimension: 1
@@ -76,5 +77,5 @@ callbacks:
   reduce_lr_factor: 0.1
   reduce_lr_patience: 5
 predictions:
-  continues: [pi]
-  fractions: [cv]# simply write fractions: [] if no fraction prediction is desired
+  continues: [pi,cv]
+  fractions: []# simply write fractions: [] if no fraction prediction is desired
