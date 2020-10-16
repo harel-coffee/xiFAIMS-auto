@@ -1,0 +1,81 @@
+LSTM:
+  activation: tanh
+  activity_regularization: l2
+  activityregularizer_value: 0.001
+  bidirectional: true
+  kernel_regularization: l2
+  kernelregularizer_value: 0.001
+  lstm_bn: true
+  nlayers: 1
+  type: GRU
+  units: 50
+dense:
+  activation:
+  - relu
+  - relu
+  - relu
+  dense_bn:
+  - true
+  - true
+  - true
+  dropout:
+  - 0.1
+  - 0.1
+  - 0.1
+  kernel_regularizer:
+  - l2
+  - l2
+  - l2
+  neurons:
+  - 300
+  - 150
+  - 75
+  nlayers: 3
+  regularization:
+  - true
+  - true
+  - true
+  regularizer_value:
+  - 0.001
+  - 0.001
+  - 0.001
+embedding:
+  length: 50
+learning:
+  batch_size: 256
+  epochs: 50
+  learningrate: 0.01
+  verbose: 1
+  optimizer: adam
+output:
+  callback-path: data/results/callbacks/
+  cv-activation: sigmoid
+  cv-column: cv_ordinal
+  cv-dimension: 18
+  cv-loss: binary_crossentropy
+  cv-metrics: mse
+  cv-weight: 50
+  # cv-activation: linear
+  # cv-column: cv
+  # cv-dimension: 1
+  # cv-loss: mse
+  # cv-metrics: mse
+  # cv-weight: 1
+siamese:
+  use: True
+  merge_type: add
+  single_predictions: True
+callbacks:
+  callback_path: C:\Users\hanjo\PycharmProjects\xiRT\sample_data\
+  check_point: True
+  log_csv: True
+  early_stopping: True
+  early_stopping_patience: 10
+  tensor_board: False
+  progressbar: True
+  reduce_lr: True
+  reduce_lr_factor: 0.1
+  reduce_lr_patience: 5
+predictions:
+  continues: []
+  fractions: [cv]# simply write fractions: [] if no fraction prediction is desired

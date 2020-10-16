@@ -6,7 +6,7 @@ Created on Wed Oct 14 21:55:31 2020
 import re
 
 
-def get_faims_cv(run):
+def get_faims_cv(run, acq="LS"):
     """
     Annotate data with faims CV.
 
@@ -21,7 +21,10 @@ def get_faims_cv(run):
         cv extract from run.
 
     """
-    return float(re.search(r"CV(\d+)", run).groups()[0])
+    if acq == "LS":
+        return float(re.search(r"CV(\d+)", run).groups()[0])
+    else:
+        return float(re.search(r"_(\d+)_", run).groups()[0])
 
 
 def preprocess_nonunique(df_psms):

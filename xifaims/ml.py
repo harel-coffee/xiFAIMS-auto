@@ -69,7 +69,7 @@ def training(df_TT, df_TT_features, model="SVM", scale=True, model_args={}):
     val_y = df_TT["CV"].loc[validation_idx]
 
     # fit the baseline
-    if model == "SVR":
+    if model == "SVM":
         return SVR_baseline(train_df, train_y, val_df, val_y, model_args)
 
     elif model == "XGB":
@@ -144,7 +144,7 @@ def mle_feature_selection():
     plt.show()
 
 
-def SVR_baseline(train_df, train_y, val_df, val_y, model_args={"jobs": 8}, cv=3):
+def SVR_baseline(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "type": "SVC"}, cv=3):
     """
     Fits a SVM baseline model with exhaustive parameter optimization.
 
@@ -170,33 +170,42 @@ def SVR_baseline(train_df, train_y, val_df, val_y, model_args={"jobs": 8}, cv=3)
     tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4], 'C': [1, 10, 100, 1000]},
                         {'kernel': ['linear'], 'C': [1, 10, 100, 1000]}]
     # grid search
-    gs = GridSearchCV(SVR(), tuned_parameters, cv=cv, scoring="neg_mean_squared_error",
+    if model_args["type"] == "SVC":
+        clf = SVC
+        metric = "accuracy"
+        
+    elif model_args["type"] == "SVR":
+        clf = SVR
+        metric = "neg_mean_squared_error"
+        
+    gs = GridSearchCV(clf(), tuned_parameters, cv=cv, scoring=metric,
                       return_train_score=True, verbose=1, n_jobs=model_args["jobs"])
     gs.fit(train_df, train_y)
 
     # refit clf
-    svc = SVR(**gs.best_params_)
+    svc = clf(**gs.best_params_)
     svc.fit(train_df, train_y)
 
     # get summary results
-    df_results, cv_res = format_summary(train_df, val_df, train_y, val_y, svc, "SVR", gs)
+    df_results, cv_res = format_summary(train_df, val_df, train_y, val_y, svc, model_args["type"],
+                                        gs)
     cv_res["params"] = str(gs.best_params_)
     return df_results, cv_res, gs, svc
 
 
 def create_model(n1, d1, lr, epochs=100, batch_size=32, input_dim=29):
-    input_dim = train_df.shape[1]
+    """Helper function for gridsearch with keras."""
     inputs = keras.Input(shape=(input_dim,))
     x = Dense(n1, activation="relu", kernel_regularizer="l2")(inputs)
     x = Dropout(d1)(x)
 
-    x = Dense(int(n* 0.75), activation="relu", kernel_regularizer="l2")(inputs)
+    x = Dense(int(n1* 0.75), activation="relu", kernel_regularizer="l2")(inputs)
     x = Dropout(d1)(x)
 
-    x = Dense(int(n* 0.50), activation="relu", kernel_regularizer="l2")(x)
+    x = Dense(int(n1* 0.50), activation="relu", kernel_regularizer="l2")(x)
     x = Dropout(d1)(x)
 
-    x = Dense(int(n* 0.1), activation="relu", kernel_regularizer="l2")(x)
+    x = Dense(int(n1* 0.1), activation="relu", kernel_regularizer="l2")(x)
     x = Dropout(d1)(x)
     outputs = Dense(1, activation="linear")(x)
 
@@ -220,7 +229,7 @@ def FAIMSNETNN_model(train_df, train_y, val_df, val_y, model_args, cv=3):
 
     gs = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-1, cv=cv,
                       return_train_score=True, verbose=2)
-    gs.fit(train_df, train_y)
+    gsresults = gs.fit(train_df, train_y)
 
     # history = model.fit(train_df, train_y, validation_split=0.1, epochs=200, batch_size=16)
 
@@ -229,7 +238,7 @@ def FAIMSNETNN_model(train_df, train_y, val_df, val_y, model_args, cv=3):
     history = model.fit(train_df, train_y, validation_split=0.1, epochs=gs.best_params_["epochs"],
                         batch_size=gs.best_params_["batch_size"])
 
-    df_results, cv_res = format_summary(train_df, val_df, train_y, val_y, model, "FNN", gs)
+    df_results, cv_res = format_summary(train_df, val_df, train_y, val_y, model, "FNN", gsresults)
     cv_res["params"] = str(gs.best_params_)
     return df_results, cv_res, gs, model
 
