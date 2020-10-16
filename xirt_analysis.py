@@ -41,15 +41,21 @@ def converter(prediction, ys, xirt_loc):
     return preds, obs
 
 
-if len(sys.argv) != 4:
-    print("""
-          Please supply two arguments with the script:
-              python xirt_analysis.py psms.csv xirt.yaml learning.yaml""")
+# test:
+# epochs, batch_size, weights
+# transfer learning
+
+if len(sys.argv) != 6:
+    print("""Please supply two arguments with the script: 
+          python xirt_analysis.py psms.csv xirt.yaml learning.yaml""")
+
 print(sys.argv)
 
 infile = sys.argv[1]
 xirt_loc = sys.argv[2]
 setup_loc = sys.argv[3]
+batch_size = int(sys.argv[4])
+epochs = int(sys.argv[5])
 
 # infile = "data/4PM_DSS_LS_nonunique1pCSM.csv"
 # xirt_loc = "parameters/xirt_faims_ordinal_aux.yaml"
@@ -71,8 +77,8 @@ if not os.path.exists(out_dir_root):
 
 
 xirt_params = yaml.load(open(xirt_loc), Loader=yaml.FullLoader)
-xirt_params["learning"]["epochs"] = 50
-xirt_params["learning"]["batch_size"] = 128
+xirt_params["learning"]["epochs"] = epochs
+xirt_params["learning"]["batch_size"] = batch_size
 xirt_params["callbacks"]["callback_path"] = out_dir
 
 learning_params = yaml.load(open(setup_loc), Loader=yaml.FullLoader)
