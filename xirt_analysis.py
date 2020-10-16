@@ -162,17 +162,22 @@ for train_idx, val_idx, pred_idx in training_data.iter_splits(n_splits=n_splits,
 
     # aux has multiple output variables which requires looping for plotting
     if "aux0" not in xirt_loc:
+        # get predictions
         predictions_v = xirtnetwork.model.predict(xv_cv)
         predictions_t = xirtnetwork.model.predict(xt_cv)
         predictions_p = xirtnetwork.model.predict(xp_cv)
 
+        # forma predictions base on ordinal / regression task
         predictions_vv, obs_v = converter(predictions_v, yv_cv, xirt_loc)
         predictions_tt, obs_t = converter(predictions_t, yt_cv, xirt_loc)
         predictions_pp, obs_p = converter(predictions_p, yp_cv, xirt_loc)
         
+        # overwrite initial predictions wth formated ones
         predictions_v[0] = predictions_vv
         predictions_t[0] = predictions_tt
         predictions_p[0] = predictions_pp
+        
+        # do the same for the training targets
         yv_cv[0] = obs_v
         yt_cv[0] = obs_t
         yp_cv[0] = obs_p
@@ -226,7 +231,7 @@ for train_idx, val_idx, pred_idx in training_data.iter_splits(n_splits=n_splits,
         results["pearsonr"].append(pearsonr(predictions_p, obs_p)[0])
         results["r2"].append(results["pearsonr"][-1]**2)
         
-        f, ax = plt.subplots(2, len(all_cols), figsize=(4*len(all_cols), 8))
+        f, ax = plt.subplots(3, len(all_cols), figsize=(4*len(all_cols), 8))
         # train
         prs = np.round(results["pearsonr"][-1], 2)
         ax[0].scatter(predictions_t, obs_t)
@@ -238,9 +243,8 @@ for train_idx, val_idx, pred_idx in training_data.iter_splits(n_splits=n_splits,
                   ylabel="Observerd", title="cv prs: {}".format(prs))
 
         prs = np.round(results["pearsonr"][-2], 2)
-        ax[2].scatter(predictions_v, obs_v)
-        ax[2].set(xlabel="Predicted\nPrediction",
-                  ylabel="Observerd", title="cv prs: {}".format(prs))
+        ax[2].scatter(predictions_p, obs_p)
+        ax[2].set(xlabel="Predicted\nPrediction", ylabel="Observerd", title="cv prs: {}".format(prs))
         
     results["split"].append("validation")
     results["split"].append("training")
