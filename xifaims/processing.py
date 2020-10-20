@@ -4,7 +4,7 @@ Created on Wed Oct 14 21:55:31 2020
 @author: hanjo
 """
 import re
-
+import numpy as np
 
 def get_faims_cv(run, acq="LS"):
     """
@@ -115,3 +115,10 @@ def charge_filter(df, charge):
 
     elif charge == 5:
         return df[df["exp charge"] == 5]
+
+
+def find_nearest(value, array):
+    """Return closes value in the array that matches the input value."""
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return array[idx]
