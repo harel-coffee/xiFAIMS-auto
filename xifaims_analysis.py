@@ -90,36 +90,36 @@ df_DX_features = df_DX_features[config["include"]]
 
 xpl.feature_correlation_plot(df_TT_features, dir_res, prefix="TT_")
 #%%
-# train baseline
-# classifier
-# print("SVM ...")
-# svm_options = {"jobs": config["jobs"], "type": "SVC"}
-# svm_predictions, svm_metric, svm_gs, svm_clf = xml.training(df_TT, df_TT_features, model="SVM",
-#                                                             scale=True, model_args=svm_options)
+#train baseline
+#classifier
+print("SVM ...")
+svm_options = {"jobs": config["jobs"], "type": "SVC"}
+svm_predictions, svm_metric, svm_gs, svm_clf = xml.training(df_TT, df_TT_features, model="SVM",
+                                                            scale=True, model_args=svm_options)
 
-# # regression
-# print("SVR ...")
-# svm_options = {"jobs": config["jobs"], "type": "SVR"}
-# svr_predictions, svr_metric, svr_gs, svr_clf = xml.training(df_TT, df_TT_features, model="SVM",
-#                                                             scale=True, model_args=svm_options)
+# regression
+print("SVR ...")
+svm_options = {"jobs": config["jobs"], "type": "SVR"}
+svr_predictions, svr_metric, svr_gs, svr_clf = xml.training(df_TT, df_TT_features, model="SVM",
+                                                            scale=True, model_args=svm_options)
 
-# # regression
-# print("XGB Regression ...")
-# xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBR"}
-# xgbr_predictions, xgbr_metric, xgbr_gs, xgbr_clf = xml.training(df_TT, df_TT_features, model="XGB",
-#                                                             scale=True, model_args=xgb_options)
+# regression
+print("XGB Regression ...")
+xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBR"}
+xgbr_predictions, xgbr_metric, xgbr_gs, xgbr_clf = xml.training(df_TT, df_TT_features, model="XGB",
+                                                            scale=True, model_args=xgb_options)
 
-# # regression, sequential selection
-# print("XGB Regression (sequential)...")
-# xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBRS"}
-# xgbrs_predictions, xgbrs_metric, xgbrs_gs, xgbrs_clf = xml.training(df_TT, df_TT_features, model="XGBS",
-#                                                                     scale=True, model_args=xgb_options)
+# regression, sequential selection
+print("XGB Regression (sequential)...")
+xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBRS"}
+xgbrs_predictions, xgbrs_metric, xgbrs_gs, xgbrs_clf = xml.training(df_TT, df_TT_features, model="XGBS",
+                                                                    scale=True, model_args=xgb_options)
 
-# # classification
-# print("XGB classification ...")
-# xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBC"}
-# xgbc_predictions, xgbc_metric, xgbc_gs, xgbc_clf = xml.training(df_TT, df_TT_features, model="XGB",
-#                                                             scale=True, model_args=xgb_options)
+# classification
+print("XGB classification ...")
+xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBC"}
+xgbc_predictions, xgbc_metric, xgbc_gs, xgbc_clf = xml.training(df_TT, df_TT_features, model="XGB",
+                                                            scale=True, model_args=xgb_options)
 
 # classification
 print("FNN ...")

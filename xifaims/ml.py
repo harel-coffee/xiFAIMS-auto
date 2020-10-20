@@ -225,9 +225,9 @@ def FAIMSNETNN_model(train_df, train_y, val_df, val_y, model_args, cv=3):
         param_grid = {"n1": [100], "d1": [0.3, 0.1], "lr": [0.001, 0.01], "epochs": [50, 100],
                       "batch_size": [32, 128], "input_dim": [input_dim]}
     else:
-        param_grid = {"n1": [100, 200, 500, 1000], "d1": [0.5, 0.3, 0.15, 0.1],
-                      "lr": [0.0001, 0.001, 0.01, 0.1], "epochs": [50],
-                      "batch_size": [16, 32, 64, 128], "input_dim": [input_dim]}
+        param_grid = {"n1": [100, 200, 500], "d1": [0.5, 0.3, 0.1],
+                      "lr": [0.0001, 0.001, 0.01], "epochs": [50],
+                      "batch_size": [32, 64, 128], "input_dim": [input_dim]}
 
     model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=create_model, verbose=0)
 
@@ -310,7 +310,7 @@ def XGB_model(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "grid": "
         scoring = "accuracy"
 
     xgbr = xgb_clf()
-    gs = GridSearchCV(estimator=xgbr, param_grid=parameters, cv=cv, n_jobs=-1,
+    gs = GridSearchCV(estimator=xgbr, param_grid=parameters, cv=cv, n_jobs=model_args["jobs"],
                       verbose=1, scoring=scoring, return_train_score=True)
     gs.fit(train_df, train_y)
 
