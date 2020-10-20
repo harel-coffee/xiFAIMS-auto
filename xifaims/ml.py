@@ -231,7 +231,7 @@ def FAIMSNETNN_model(train_df, train_y, val_df, val_y, model_args, cv=3):
 
     model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=create_model, verbose=0)
 
-    gs = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-1, cv=cv,
+    gs = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=model_args["jobs"], cv=cv,
                       return_train_score=True, verbose=2)
     gsresults = gs.fit(train_df, train_y)
 
