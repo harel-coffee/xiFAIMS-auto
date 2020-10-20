@@ -47,9 +47,9 @@ config_loc = sys.argv[1]
 infile_loc = sys.argv[2]
 
 # # parsing and options
-infile_loc = "data/4PM_DSS_LS_nonunique1pCSM.csv"
+#infile_loc = "data/4PM_DSS_LS_nonunique1pCSM.csv"
 # config_loc = "parameters/faims_all.yaml"
-config_loc = "parameters/faims_minimal.yaml"
+#config_loc = "parameters/faims_minimal.yaml"
 # config_loc = "parameters/faims_structure.yaml"
 
 #%%
