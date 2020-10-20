@@ -81,14 +81,17 @@ df_DX = xp.charge_filter(df_DX, config["charge"])
 # compute features
 df_TT_features = xf.compute_features(df_TT)
 df_DX_features = xf.compute_features(df_DX)
+
 # drop_features = ["proline", "DE", "KR", "log10mass", "Glycine"]
 df_TT_features = df_TT_features.drop(config["exclude"], axis=1)
 df_DX_features = df_DX_features.drop(config["exclude"], axis=1)
 
-df_TT_features = df_TT_features[config["include"]]
-df_DX_features = df_DX_features[config["include"]]
-
-xpl.feature_correlation_plot(df_TT_features, dir_res, prefix="TT_")
+# only filter if include is specified, else just take all columns
+if len(config["include"]) > 0:
+    df_TT_features = df_TT_features[config["include"]]
+    df_DX_features = df_DX_features[config["include"]]
+    
+#xpl.feature_correlation_plot(df_TT_features, dir_res, prefix="TT_")
 #%%
 #train baseline
 #classifier
