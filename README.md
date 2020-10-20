@@ -23,6 +23,17 @@ The analysis is divided into three parts:
 - shap analysis for the xifaims analysis
 
 
+## feature selection
+
+There a couple of feature selection steps involved in the xifaims script. We use the YAML files in the
+parameters folder (parameters/faims_all.yaml) to define the different feature sets:
+
+- minimal -> minimal set of features
+- smaller -> more features
+- small -> even more featues
+- structure -> add structural biopython features
+- all -> all features discussed
+
 ### running xirt
 To run the various experiments with xiRT, navigate to the bash folder and simply run the
 run_xirt.bat. This script will run a combination of parameters for xiRT (regression, ordinal) +-
@@ -33,5 +44,12 @@ The resulting table must be analyzed in the notebook xirt_summary.ipynb
 This module performs the "standard" ML approach using xgboost etc. Here different feature 
 combinations are used.
 
+
+### bash scripts
+
+For convenience the *.bat files contain all python calls with the various options.
+
+
 ## results summary
- TBD
+*please see the notebooks in the mean time*
+TBD
