@@ -20,6 +20,9 @@ palettable = "*"
 xlrd = "*"
 statannot = "*"
 openpyxl = "*"
+modlamp ="*"
+mlxtend ="*"
+pip3 install git+git://github.com/SylwiaOliwia2/xgboost-AutoTune@choose-params
 
 [dev-packages]
 twine = "*"

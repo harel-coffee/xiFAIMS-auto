@@ -15,7 +15,7 @@ from mlxtend.feature_selection import SequentialFeatureSelector as SFS
 from mlxtend.plotting import plot_sequential_feature_selection as plot_sfs
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.preprocessing import MinMaxScaler, RobustScaler, StandardScaler
-from sklearn.metrics import make_scorer, mean_squared_error
+from sklearn.metrics import make_scorer, mean_squared_error, accuracy_score
 from sklearn.svm import SVC, SVR
 from xgboost_autotune import fit_parameters
 from tensorflow import keras
@@ -78,7 +78,10 @@ def training(df_TT, df_TT_features, model="SVM", scale=True, model_args={}):
     elif model == "FNN":
         return FAIMSNETNN_model(train_df, train_y, val_df, val_y, model_args)
     
-    
+    elif model == "XGBS":
+        return XGB_model_sequential(train_df, train_y, val_df, val_y, model_args)
+
+
 def format_summary(train_df, val_df, train_y, val_y, clf, clf_name, gs):
     """
     Create summary dataframes for classifier performance.
@@ -173,11 +176,11 @@ def SVR_baseline(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "type"
     if model_args["type"] == "SVC":
         clf = SVC
         metric = "accuracy"
-        
+
     elif model_args["type"] == "SVR":
         clf = SVR
         metric = "neg_mean_squared_error"
-        
+
     gs = GridSearchCV(clf(), tuned_parameters, cv=cv, scoring=metric,
                       return_train_score=True, verbose=1, n_jobs=model_args["jobs"])
     gs.fit(train_df, train_y)
@@ -220,12 +223,12 @@ def FAIMSNETNN_model(train_df, train_y, val_df, val_y, model_args, cv=3):
     input_dim = train_df.shape[1]
     if model_args["grid"] == "tiny":
         param_grid = {"n1": [100], "d1": [0.3, 0.1], "lr": [0.001, 0.01], "epochs": [50, 100],
-                      "batch_size": [32, 128], "input_dim": [input_dim]}        
+                      "batch_size": [32, 128], "input_dim": [input_dim]}
     else:
         param_grid = {"n1": [100, 200, 500, 1000], "d1": [0.5, 0.3, 0.15, 0.1],
                       "lr": [0.0001, 0.001, 0.01, 0.1], "epochs": [50],
                       "batch_size": [16, 32, 64, 128], "input_dim": [input_dim]}
-        
+
     model = keras.wrappers.scikit_learn.KerasRegressor(build_fn=create_model, verbose=0)
 
     gs = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-1, cv=cv,
@@ -301,11 +304,11 @@ def XGB_model(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "grid": "
     if model_args["type"] == "XGBR":
         xgb_clf = xgboost.XGBRegressor
         scoring = "neg_mean_squared_error"
-    
+
     elif model_args["type"] == "XGBC":
         xgb_clf = xgboost.XGBClassifier
         scoring = "accuracy"
-        
+
     xgbr = xgb_clf()
     gs = GridSearchCV(estimator=xgbr, param_grid=parameters, cv=cv, n_jobs=-1,
                       verbose=1, scoring=scoring, return_train_score=True)
@@ -315,13 +318,14 @@ def XGB_model(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "grid": "
     xgbr = xgb_clf(**gs.best_params_)
     xgbr.fit(train_df, train_y)
 
-    df_results, cv_res = format_summary(train_df, val_df, train_y, val_y, xgbr, model_args["type"], 
+    df_results, cv_res = format_summary(train_df, val_df, train_y, val_y, xgbr, model_args["type"],
                                         gs)
     cv_res["params"] = str(gs.best_params_)
     return df_results, cv_res, gs, xgbr
 
 
-def XGB_model_sequential(train_df, train_y, val_df, val_y):
+def XGB_model_sequential(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "grid": "small",
+                                                            "type": "XGBCS"}, cv=3):
     """
     Fit a XGB Model by sequentially testing set of parameters. Faster than XGB_model but less acc.
 
@@ -343,23 +347,31 @@ def XGB_model_sequential(train_df, train_y, val_df, val_y):
     cv_res : TYPE
         DESCRIPTION.
 
+    Example:
+    -------
+    df_TT, df_TT_features, model="XGB", scale=True, model_args=xgb_options
+
     """
+    print("done!")
     # xgb model and grid search
-    mse = make_scorer(mean_squared_error, greater_is_better=False)
-    gs = fit_parameters(initial_model=xgboost.XGBRegressor(),
-                        initial_params_dict={},
-                        X_train=train_df,
-                        y_train=train_y,
-                        min_loss=0.01,
-                        scoring=mse, n_folds=3)
+    if model_args["type"] == "XGBRS":
+        xgb_clf = xgboost.XGBRegressor
+        scoring = make_scorer(mean_squared_error, greater_is_better=False)
+
+    elif model_args["type"] == "XGBCS":
+        xgb_clf = xgboost.XGBClassifier
+        scoring = make_scorer(accuracy_score, greater_is_better=True)
+
+    # xgb model and grid search
+    gs = fit_parameters(initial_model=xgb_clf(), initial_params_dict={},
+                        X_train=train_df, y_train=train_y, min_loss=0.01, scoring=scoring, 
+                        n_folds=cv)
 
     # xgb model and grid search dummy
     params = {i: [j] for i, j in gs.get_params().items()}
-    xgbr = xgboost.XGBRegressor()
-    gs = GridSearchCV(estimator=xgbr, param_grid=params,
-                      cv=3, n_jobs=1,
-                      verbose=1, scoring="neg_mean_squared_error",
-                      return_train_score=True)
+    xgbr = xgb_clf()
+    gs = GridSearchCV(estimator=xgbr, param_grid=params, cv=cv, n_jobs=model_args["jobs"],
+                      verbose=1, scoring="neg_mean_squared_error", return_train_score=True)
     gs.fit(train_df, train_y)
 
     # refit clf

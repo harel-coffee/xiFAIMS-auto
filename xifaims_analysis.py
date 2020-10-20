@@ -47,9 +47,9 @@ config_loc = sys.argv[1]
 infile_loc = sys.argv[2]
 
 # # parsing and options
-# infile_loc = "data/4PM_DSS_LS_nonunique1pCSM.csv"
+infile_loc = "data/4PM_DSS_LS_nonunique1pCSM.csv"
 # config_loc = "parameters/faims_all.yaml"
-# config_loc = "parameters/faims_minimal.yaml"
+config_loc = "parameters/faims_minimal.yaml"
 # config_loc = "parameters/faims_structure.yaml"
 
 #%%
@@ -108,6 +108,13 @@ print("XGB Regression ...")
 xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBR"}
 xgbr_predictions, xgbr_metric, xgbr_gs, xgbr_clf = xml.training(df_TT, df_TT_features, model="XGB",
                                                             scale=True, model_args=xgb_options)
+
+# regression, sequential selection
+print("XGB Regression (sequential)...")
+xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBRS"}
+xgbrs_predictions, xgbrs_metric, xgbrs_gs, xgbrs_clf = xml.training(df_TT, df_TT_features, model="XGBS",
+                                                                    scale=True, model_args=xgb_options)
+
 # classification
 print("XGB classification ...")
 xgb_options = {"grid": config["grid"], "jobs": config["jobs"], "type": "XGBC"}
@@ -122,13 +129,16 @@ FNN_predictions, fnn_metric, fnn_gs, fnn_clf = xml.training(df_TT, df_TT_feature
 
 # %% organize results
 # concat to one dataframe for easier plotting
-all_clf = pd.concat([svm_predictions, svr_predictions, xgbr_predictions, xgbc_predictions, FNN_predictions])
+all_clf = pd.concat([svm_predictions, svr_predictions, xgbr_predictions, xgbrs_predictions, 
+                     xgbc_predictions, FNN_predictions])
+
 all_clf["run"] = prefix
 all_clf["config"] = config_loc
 all_clf["infile"] = infile_loc
 all_clf["run"] = prefix
 
-all_metrics = pd.concat([svm_metric,svr_metric, xgbr_metric, xgbc_metric, fnn_metric])
+all_metrics = pd.concat([svm_metric, svr_metric, xgbr_metric, xgbrs_metric, 
+                         xgbc_metric, fnn_metric])
 all_metrics["config"] = config_loc
 all_metrics["infile"] = infile_loc
 all_metrics["run"] = prefix
