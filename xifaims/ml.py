@@ -220,7 +220,7 @@ def FAIMSNETNN_model(train_df, train_y, val_df, val_y, model_args, cv=3):
     """FIT neuralnetwork model."""
     input_dim = train_df.shape[1]
     if model_args["grid"] == "tiny":
-        param_grid = {"n1": [100], "d1": [0.3, 0.1], "lr": [0.001, 0.01], "epochs": [50, 100],
+        param_grid = {"n1": [100], "d1": [0.3, 0.1], "lr": [0.001, 0.01], "epochs": [50],
                       "batch_size": [32, 128], "input_dim": [input_dim]}
     else:
         param_grid = {"n1": [100, 200, 500], "d1": [0.5, 0.3, 0.1],
