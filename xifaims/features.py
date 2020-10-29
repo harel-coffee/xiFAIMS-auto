@@ -51,7 +51,7 @@ def get_structure_perc(seq, structure="helix"):
         return sheets
 
 
-def compute_features(df):
+def compute_features(df, onehot=True):
     """
     Compute features for peptide sequences.
 
@@ -78,7 +78,14 @@ def compute_features(df):
         df["PeptideLength2"]
     df_features["mass"] = df["exp mass"]
     df_features["log10mass"] = np.log10(df["exp mass"])
-    df_features["p.charge"] = df["exp charge"]
+
+    if onehot:
+        ohc = pd.get_dummies(df["exp charge"])
+        ohc.columns = ["charge_" + str(i) for i in ohc.columns]
+        df_features = df_features.join(ohc)
+    else:
+        df_features["p.charge"] = df["exp charge"]
+
     df_features["DE"] = df["seq1seq2"].str.count("D") + df["seq1seq2"].str.count("E")
     df_features["KR"] = df["seq1seq2"].str.count("K") + df["seq1seq2"].str.count("R")
     df_features["aromatics"] = df["seq1seq2"].str.count("F") + \
