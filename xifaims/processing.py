@@ -87,7 +87,7 @@ def split_target_decoys(df_psms, frac=1, random_state=42):
     df_TT = df_TT.reset_index(drop=True)
 
     df_DX = df_psms[~df_psms.isTT]
-    df_DX = df_TT.reset_index(drop=True)
+    df_DX = df_DX.reset_index(drop=True)
     return(df_TT, df_DX)
 
 
