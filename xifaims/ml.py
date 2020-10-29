@@ -56,10 +56,8 @@ def training(df_TT, df_TT_features, model="SVM", scale=True, model_args={}):
         val_df = ss_train.transform(df_TT_features.loc[validation_idx])
         train_df = ss_train.transform(df_TT_features.loc[training_idx])
 
-        train_df = pd.DataFrame(
-            train_df, index=training_idx, columns=df_TT_features.columns)
-        val_df = pd.DataFrame(val_df, index=validation_idx,
-                              columns=df_TT_features.columns)
+        train_df = pd.DataFrame(train_df, index=training_idx, columns=df_TT_features.columns)
+        val_df = pd.DataFrame(val_df, index=validation_idx, columns=df_TT_features.columns)
     else:
         val_df = df_TT_features.loc[validation_idx]
         train_df = df_TT_features.loc[training_idx]
