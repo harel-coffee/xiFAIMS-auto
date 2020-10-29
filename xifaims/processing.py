@@ -5,6 +5,9 @@ Created on Wed Oct 14 21:55:31 2020
 """
 import re
 import numpy as np
+import pickle
+import os
+
 
 def get_faims_cv(run, acq="LS"):
     """
@@ -89,6 +92,21 @@ def split_target_decoys(df_psms, frac=1, random_state=42):
     df_DX = df_psms[~df_psms.isTT]
     df_DX = df_DX.reset_index(drop=True)
     return(df_TT, df_DX)
+
+def store_for_shap(df_TT, df_TT_features, df_DX, df_DX_features, classifier, path=""):
+    all_objs = {"TT": df_TT,
+                "TT_feat": df_TT_features,
+                "DX": df_DX,
+                "DX_features": df_DX_features,
+                "clf": classifier}
+
+    pickle.dump(all_objs, open(os.path.join(path, "xgboost_seq_data.p"), "wb"))
+
+
+def load_for_shap(path):
+    shap_data = pickle.load(open(os.path.join(path, "xgboost_seq_data.p"), "rb"))
+    return shap_data["TT"], shap_data["TT_feat"], shap_data["DX"], shap_data["DX_features"], \
+           shap_data["clf"]
 
 
 def charge_filter(df, charge):

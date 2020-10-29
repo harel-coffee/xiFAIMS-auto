@@ -22,6 +22,48 @@ from tensorflow import keras
 from tensorflow.keras.layers import Dense, Dropout
 
 # from xgboost_autotune import fit_parameters
+def preprocess_train_test(df_TT, df_TT_features, scale=True):
+    """
+    Perform training a with variable models on the data.
+
+    Parameters
+    ----------
+    df_TT : TYPE
+        DESCRIPTION.
+    df_TT_features : TYPE
+        DESCRIPTION.
+    model : TYPE, optional
+        DESCRIPTION. The default is "SVM".
+    scale : TYPE, optional
+        DESCRIPTION. The default is True.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    """
+    # train, validation split
+    training_idx, validation_idx = train_test_split(df_TT.index, test_size=0.1)
+
+    # global scaler
+    ss_train = MinMaxScaler().fit(df_TT_features.loc[training_idx])
+
+    # x variable
+    if scale:
+        val_df = ss_train.transform(df_TT_features.loc[validation_idx])
+        train_df = ss_train.transform(df_TT_features.loc[training_idx])
+
+        train_df = pd.DataFrame(train_df, index=training_idx, columns=df_TT_features.columns)
+        val_df = pd.DataFrame(val_df, index=validation_idx, columns=df_TT_features.columns)
+    else:
+        val_df = df_TT_features.loc[validation_idx]
+        train_df = df_TT_features.loc[training_idx]
+
+    # y variable
+    train_y = df_TT["CV"].loc[training_idx]
+    val_y = df_TT["CV"].loc[validation_idx]
+    return train_df, train_y, val_df, val_y
 
 
 def training(df_TT, df_TT_features, model="SVM", scale=True, model_args={}):
@@ -168,7 +210,7 @@ def SVR_baseline(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "type"
         DESCRIPTION.
 
     """
-    tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e2, 1e-3], 'C': [1, 10, 100]},
+    tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e2, 1e-3], 'C': [1, 10]},
                         {'kernel': ['linear'], 'C': [1, 10, 100]}]
     # grid search
     if model_args["type"] == "SVC":
