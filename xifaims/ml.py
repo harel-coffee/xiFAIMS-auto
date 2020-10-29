@@ -168,8 +168,8 @@ def SVR_baseline(train_df, train_y, val_df, val_y, model_args={"jobs": 8, "type"
         DESCRIPTION.
 
     """
-    tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e2, 1e-3, 1e-4], 'C': [1, 10, 100, 1000]},
-                        {'kernel': ['linear'], 'C': [1, 10, 100, 1000]}]
+    tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e2, 1e-3], 'C': [1, 10, 100]},
+                        {'kernel': ['linear'], 'C': [1, 10, 100]}]
     # grid search
     if model_args["type"] == "SVC":
         clf = SVC
