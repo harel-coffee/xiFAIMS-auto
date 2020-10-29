@@ -4,7 +4,7 @@ charge: all
 prefix: small
 jobs: -1
 exclude: []
-include: ["length1", "length2", "mass", "m/z", "p.charge", "pi"]
+include: ["length1", "length2", "mass", "m/z", 'charge_3', 'charge_4', 'charge_5', 'charge_6', 'charge_7', "pi"]
 grid: "tiny"
 
 

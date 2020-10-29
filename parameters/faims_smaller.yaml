@@ -4,7 +4,7 @@ charge: all
 prefix: smaller
 jobs: -1
 exclude: []
-include: ["length1", "length2", "mass", "p.charge", "pi", "charge_density", "charge_cmp", "polarity_sum", "estatic_sum", "m/z"]
+include: ["length1", "length2", "mass", 'charge_3', 'charge_4', 'charge_5', 'charge_6', 'charge_7', "pi", "charge_density", "charge_cmp", "polarity_sum", "estatic_sum", "m/z"]
 grid: "tiny"
 
 

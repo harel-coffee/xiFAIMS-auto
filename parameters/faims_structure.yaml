@@ -4,7 +4,7 @@ charge: all
 prefix: structure
 jobs: -1
 exclude: []
-include: ["length1", "length2", "mass", "charge_cmp", "m/z", "pi", "charge_density", 'aromatics', 'helix', 'sheet', 'turn', 'secondstruc_sum', 'secondstruc_size_std', 'secondstruc_size_max']
+include: ["length1", "length2", "mass", 'charge_3', 'charge_4', 'charge_5', 'charge_6', 'charge_7', "charge_cmp", "m/z", "pi", "charge_density", 'aromatics', 'helix', 'sheet', 'turn', 'secondstruc_sum', 'secondstruc_size_std', 'secondstruc_size_max']
 grid: "tiny"
 
 
