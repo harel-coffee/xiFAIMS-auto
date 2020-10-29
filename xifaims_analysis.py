@@ -45,6 +45,7 @@ def summarize_df(all_clf):
 
 config_loc = sys.argv[1]
 infile_loc = sys.argv[2]
+results_dir = sys.argv[3]
 
 # # parsing and options
 #infile_loc = "data/4PM_DSS_LS_nonunique1pCSM.csv"
@@ -58,7 +59,7 @@ config = yaml.load(open(config_loc), Loader=yaml.FullLoader)
 config["grid"] = "small"
 config["jobs"] = -1
 print(config)
-dir_res = os.path.join("results", prefix)
+dir_res = os.path.join(results_dir, prefix)
 if not os.path.exists(dir_res):
     os.makedirs(dir_res)
 ############################################################
