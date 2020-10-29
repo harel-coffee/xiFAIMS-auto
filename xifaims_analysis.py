@@ -50,7 +50,7 @@ infile_loc = sys.argv[2]
 #infile_loc = "data/4PM_DSS_LS_nonunique1pCSM.csv"
 # config_loc = "parameters/faims_all.yaml"
 #config_loc = "parameters/faims_minimal.yaml"
-# config_loc = "parameters/faims_structure.yaml"
+#config_loc = "parameters/faims_structure.yaml"
 
 #%%
 prefix = os.path.basename(config_loc.split(".")[0]) + "-" + os.path.basename(infile_loc.replace(".csv", ""))

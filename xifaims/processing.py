@@ -22,7 +22,11 @@ def get_faims_cv(run, acq="LS"):
 
     """
     if acq == "LS":
-        return float(re.search(r"CV(\d+)", run).groups()[0])
+        try:
+            return float(re.search(r"CV(\d+)", run).groups()[0])
+        except AttributeError:
+            # mixed data also possible ...
+            return float(re.search(r"_(\d+)_", run).groups()[0])
     else:
         return float(re.search(r"_(\d+)_", run).groups()[0])
 

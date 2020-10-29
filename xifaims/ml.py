@@ -383,15 +383,15 @@ def XGB_model_sequential(train_df, train_y, val_df, val_y, model_args={"jobs": 8
     return df_results, cv_res, gs, xgbr
 
 #%%
-unique_cv = np.array(sorted(xgbr_predictions["CV_Train"].drop_duplicates()))
-xgbr_predictions
-print(unique_cv)
-
-import numpy as np
-def find_nearest(value, array):
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    return array[idx]
-xgbr_predictions["CV_Predict"]
-res = xgbr_predictions["CV_Predict"].apply(find_nearest, args=(unique_cv,))
-res
+# unique_cv = np.array(sorted(xgbr_predictions["CV_Train"].drop_duplicates()))
+# xgbr_predictions
+# print(unique_cv)
+#
+# import numpy as np
+# def find_nearest(value, array):
+#     array = np.asarray(array)
+#     idx = (np.abs(array - value)).argmin()
+#     return array[idx]
+# xgbr_predictions["CV_Predict"]
+# res = xgbr_predictions["CV_Predict"].apply(find_nearest, args=(unique_cv,))
+# res
