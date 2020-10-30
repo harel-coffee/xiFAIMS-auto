@@ -11,6 +11,10 @@ List of available modules:
 - plots - visual presentation of results
 - processing - various pre and post processing tools
 
+## methods summary
+- 90% train, 10% test
+- with 90% -> 3-fold cross-validation
+
 ## installation
 Clone this repo and then install via pip (pip install -e .). Make sure to install the dependencies,
 xirt etc.
