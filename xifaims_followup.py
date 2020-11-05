@@ -30,6 +30,8 @@ import matplotlib.pyplot as plt
 import pickle
 import os
 
+from mlxtend.feature_selection import SequentialFeatureSelector
+
 
 
 def summarize_df(all_clf):
@@ -157,12 +159,12 @@ g.ax_joint._axes.plot([-80, -10], [-80, -10], c="k", lw="2", alpha=0.7, ls="--")
 plt.show()
 
 concat_df["error"] = concat_df["Observed CV"] - concat_df["Predicted CV"]
-f, ax = plt.subplots(1, figsize=(1, 4))
+f, ax = plt.subplots(1, figsize=(3, 4))
 #ax = sns.histplot(data=concat_df, x="error", hue="Type", stat="density", element="step", common_norm=True)
 ax = sns.boxplot(data=concat_df, y="error", x="Type")
 ax.axhline(0.0, lw=2, c="k", alpha=0.7, zorder=-1)
 ax.set(ylabel="CV prediction error")
 sns.despine(ax=ax)
+plt.show()
 plt.savefig("notebooks/TT_TD_prediction_error.png")
 plt.savefig("notebooks/TT_TD_prediction_error.svg")
-plt.show()
