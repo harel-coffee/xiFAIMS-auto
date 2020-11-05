@@ -1,0 +1,13 @@
+,clf,set,pearson,r2,mse,run
+0,FNN,Test,0.68,0.47,80.37,faims_all-combined_8PMLunique_4PMLS_nonu
+1,FNN,Train,0.7,0.48,69.98,faims_all-combined_8PMLunique_4PMLS_nonu
+2,SVC,Test,0.33,0.11,144.2,faims_all-combined_8PMLunique_4PMLS_nonu
+3,SVC,Train,0.97,0.94,8.26,faims_all-combined_8PMLunique_4PMLS_nonu
+4,SVR,Test,0.61,0.37,81.41,faims_all-combined_8PMLunique_4PMLS_nonu
+5,SVR,Train,0.62,0.39,81.83,faims_all-combined_8PMLunique_4PMLS_nonu
+6,XGBC,Test,0.63,0.4,85.92,faims_all-combined_8PMLunique_4PMLS_nonu
+7,XGBC,Train,1.0,1.0,0.63,faims_all-combined_8PMLunique_4PMLS_nonu
+8,XGBR,Test,0.67,0.45,76.86,faims_all-combined_8PMLunique_4PMLS_nonu
+9,XGBR,Train,0.92,0.85,21.29,faims_all-combined_8PMLunique_4PMLS_nonu
+10,XGB_sequential,Test,0.64,0.41,66.36,faims_all-combined_8PMLunique_4PMLS_nonu
+11,XGB_sequential,Train,0.82,0.68,45.18,faims_all-combined_8PMLunique_4PMLS_nonu
