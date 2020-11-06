@@ -4,10 +4,13 @@ Created on Wed Oct 14 22:50:36 2020
 @author: hanjo
 """
 
-import seaborn as sns
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+import seaborn as sns
+from statannot import add_stat_annotation
+
 
 def const_line(*args, **kwargs):
     cvs = np.array([30., 35., 40., 45., 50., 55.,
@@ -134,3 +137,36 @@ def plot_search_results(grid):
             ax[i].errorbar(x, y_2, e_2, linestyle='-', marker='^', label='train')
             ax[i].set_xlabel(p.upper())
     plt.legend()
+
+
+def target_decoy_comparison(prediction_df):
+    """
+    Plot the prediction differences between TTs and DXs.
+    """
+    prediction_df["error"] = prediction_df["Observed CV"] - prediction_df["Predicted CV"]
+    f, ax = plt.subplots(1, figsize=(3, 4))
+    if len(prediction_df["Type"].drop_duplicates()) == 3:
+        order = ["TT", "TD", "DD"]
+    else:
+        order = ["TT", "TD"]
+    sns.boxenplot(data=prediction_df, y="error", x="Type", ax=ax, order=order)
+    ax.axhline(0.0, lw=2, c="k", alpha=0.7, zorder=-1)
+    ax.set(ylabel="CV prediction error")
+    sns.despine(ax=ax)
+    test_results = add_stat_annotation(ax, data=prediction_df, x="Type", y="error", order=order,
+                                       box_pairs=[("TT", "TD")],
+                                       test='t-test_ind', text_format='star',
+                                       loc='outside', verbose=2)
+    plt.savefig("notebooks/TT_TD_prediction_error_box.png")
+    plt.savefig("notebooks/TT_TD_prediction_error_box.svg")
+    plt.show()
+
+    f, ax = plt.subplots(1, figsize=(3, 4))
+    sns.histplot(data=prediction_df, x="error", hue="Type", stat="density", element="step",
+                 common_norm=True, ax=ax)
+    ax.axhline(0.0, lw=2, c="k", alpha=0.7, zorder=-1)
+    ax.set(ylabel="CV prediction error")
+    sns.despine(ax=ax)
+    plt.savefig("notebooks/TT_TD_prediction_error_hist.png")
+    plt.savefig("notebooks/TT_TD_prediction_error_hist.svg")
+    plt.show()
