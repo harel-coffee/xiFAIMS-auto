@@ -12,10 +12,11 @@ import xgboost
 import yaml
 # from mlxtend.classifier import StackingClassifier
 from mlxtend.feature_selection import SequentialFeatureSelector
-from mlxtend.plotting import plot_sequential_feature_selection  as plot_sfs
+from mlxtend.plotting import plot_sequential_feature_selection as plot_sfs
 from scipy.stats import pearsonr
 from sklearn.model_selection import StratifiedKFold
-
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import Pipeline
 from xifaims import features as xf
 from xifaims import ml as xml
 from xifaims import plots
@@ -26,7 +27,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-def feature_selection_xgb(df_TT_features, df_TT, min_f=3, max_f=10):
+def feature_selection_xgb(df_TT_features, df_TT):
     """
     Perform Feature selection using SequentialFeatureSelector
     """
@@ -34,8 +35,7 @@ def feature_selection_xgb(df_TT_features, df_TT, min_f=3, max_f=10):
     xgbr_gs.best_params_["nthread"] = 8
     xgbr = xgboost.XGBRegressor(**xgbr_gs.best_params_)
     # feature selection
-    sfs = SequentialFeatureSelector(xgbr, #  k_features=(min_f, max_f),
-                                    k_features="parsimonious", forward=True, floating=False,
+    sfs = SequentialFeatureSelector(xgbr, k_features="parsimonious", forward=True, floating=False,
                                     verbose=2, scoring="neg_mean_squared_error", cv=3)
     sfs = sfs.fit(df_TT_features, df_TT["CV"])
     # result summary
@@ -50,7 +50,6 @@ def feature_selection_xgb(df_TT_features, df_TT, min_f=3, max_f=10):
     print('best combination (Regression: %.3f): %s\n' % (sfs.k_score_, sfs.k_feature_idx_))
     print('all subsets:\n', sfs.subsets_)
     return df_res_sfs, sfs, df_TT_features.columns[list(selected_features)]
-
 
 def get_cv_predictions(X, y, Xdx, ydx, xgbr_gs):
     """
@@ -122,10 +121,60 @@ def get_cv_predictions(X, y, Xdx, ydx, xgbr_gs):
     # plt.show()
     return CV_predictions
 
+def single_peptide_predictions():
+    """
+    Function to use the trained classifier to predict the CV only based on features
+    of a single peptide by either stting pepseq1 or pepseq2 to "". Note that some features
+    such as m/z remained unchanged since they are taken from the CSM file.
+    """
+    df_TT_p1, df_TT_p2 = df_TT.copy(), df_TT.copy()
+    df_TT_p1["PepSeq2"] = ""
+    df_TT_p2["PepSeq1"] = ""
+    df_TT_p1_features = xf.compute_features(df_TT_p1, onehot=one_hot).drop(config["exclude"],
+                                                                           axis=1)
+    df_TT_p2_features = xf.compute_features(df_TT_p2, onehot=one_hot).drop(config["exclude"],
+                                                                           axis=1)
+    df_DX_p1, df_DX_p2 = df_DX.copy(), df_DX.copy()
+    df_DX_p1["PepSeq2"] = ""
+    df_DX_p2["PepSeq1"] = ""
+    df_DX_p1_features = xf.compute_features(df_DX_p1, onehot=one_hot).drop(config["exclude"],
+                                                                           axis=1)
+    df_DX_p2_features = xf.compute_features(df_DX_p2, onehot=one_hot).drop(config["exclude"],
+                                                                           axis=1)
+    TT_p1 = xgbr_clf.predict(df_TT_p1_features[df_TT_features.columns])
+    TT_p2 = xgbr_clf.predict(df_TT_p2_features[df_TT_features.columns])
+    DX_p1 = xgbr_clf.predict(df_DX_p1_features[df_TT_features.columns])
+    DX_p2 = xgbr_clf.predict(df_DX_p2_features[df_TT_features.columns])
+    single_peps = pd.DataFrame(np.concatenate([TT_p1, TT_p2, DX_p1, DX_p2]))
+    single_peps["Type"] = np.repeat(["P1-TT", "P2-TT", "P1-DX", "P2-DX"], (len(TT_p1), len(TT_p1),
+                                                                           len(DX_p1), len(DX_p1),))
+    sns.boxplot(y=0, x="Type", data=single_peps)
+    plt.show()
+
+############################################################
+
+def feature_selection():
+    """
+    Perform feature selection on single parameter.
+    """
+    xgbr_gs.best_params_["nthread"] = 8
+    xgbr = xgboost.XGBRegressor(**xgbr_gs.best_params_)
+
+    # feature selection
+    sfs = SequentialFeatureSelector(xgbr, k_features="parsimonious", forward=True, floating=False,
+                                    verbose=2, scoring="neg_mean_squared_error", cv=3)
+    sfs = sfs.fit(df_TT_features, df_TT["CV"])
+    # result summary
+    df_res_sfs = pd.DataFrame.from_dict(sfs.get_metric_dict()).T
+    selected_features = sfs.k_feature_idx_
+    return df_res_sfs, selected_features
+
 #%%
 # # parsing and options
 results_dir = "results_dev"
 infile_loc = "data/combined_8PMLunique_4PMLS_nonu.csv"
+infile_loc = "data/293T_DSSO_nonunique1pCSM.csv"
+infile_val_loc = "data/26S_BS3_LS_nonunique1pCSM.csv"
 config_loc = "parameters/faims_structure_selection.yaml"
 config_loc = "parameters/faims_all.yaml"
 one_hot = False
@@ -139,41 +188,10 @@ print(config)
 dir_res = os.path.join(results_dir, prefix)
 if not os.path.exists(dir_res):
     os.makedirs(dir_res)
-############################################################
 
-# read file and annotate CV
-df = pd.read_csv(infile_loc)
-
-# set cv
-df["CV"] = - df["run"].apply(xp.get_faims_cv)
-
-# remove non-unique
-df = xp.preprocess_nonunique(df)
-# split into targets and decoys
-df_TT, df_DX = xp.split_target_decoys(df)
-
-# filter by charge
-df_TT = xp.charge_filter(df_TT, config["charge"])
-df_DX = xp.charge_filter(df_DX, config["charge"])
-
-# compute features
-df_TT_features = xf.compute_features(df_TT, onehot=one_hot)
-df_DX_features = xf.compute_features(df_DX, onehot=one_hot)
-
-# drop_features = ["proline", "DE", "KR", "log10mass", "Glycine"]
-df_TT_features = df_TT_features.drop(config["exclude"], axis=1)
-df_DX_features = df_DX_features.drop(config["exclude"], axis=1)
-
-# only filter if include is specified, else just take all columns
-if not one_hot:
-    charges = [f"charge_{d}" for d in np.arange(2, 9)]
-    config["include"] = [i for i in config["include"] if i not in charges]
-    config["include"].append("p.charge")
-
-if len(config["include"]) > 1:
-    df_TT_features = df_TT_features[config["include"]]
-    df_DX_features = df_DX_features[config["include"]]
-#%%
+# input data
+df_TT, df_DX = xp.process_csms(infile_loc)
+df_TT_features, df_DX_features = xp.process_features(df_TT, df_DX, one_hot, config)
 
 # regression
 print("Hyperparameter Optimization ...")
@@ -184,37 +202,22 @@ xgbr_predictions, xgbr_metric, xgbr_gs, xgbr_clf = xml.training(df_TT, df_TT_fea
 # store shap data
 xp.store_for_shap(df_TT, df_TT_features, df_DX, df_DX_features, xgbr_clf, path="shap",
                   prefix="xgbr_structure_not_hot")
-
 # get CV prediction (train, predict on validation fold)
 cv_predictions = get_cv_predictions(df_TT_features, df_TT["CV"], df_DX_features, df_DX["CV"], xgbr_gs)
-
 # do some vizualization
 plots.target_decoy_comparison(cv_predictions)
+#res_df, sfs, features = feature_selection_xgb(df_TT_features, df_TT, min_f=3, max_f=10)
 
-res_df, sfs, features = feature_selection_xgb(df_TT_features, df_TT, min_f=3, max_f=10)
+# validate
+df_TT_val, df_DX_val = process_csms(infile_val_loc)
+df_TT_features_val, df_DX_features_val = process_features(df_TT_val, df_DX_val, one_hot, config)
+df_TT_val["CV_predict"] = xgbr_clf.predict(df_TT_features_val)
+df_DX_val["CV_predict"] = xgbr_clf.predict(df_DX_features_val)
+df_val = pd.concat([df_TT_val, df_DX_val])
+sns.jointplot(x="CV", y="CV_predict", data=df_val, kind="kde")
+plt.show()
 
-#%%
-from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import Pipeline
-
-xgbr_gs.best_params_["nthread"] = 8
-xgbr = xgboost.XGBRegressor(**xgbr_gs.best_params_)
-# feature selection
-sfs = SequentialFeatureSelector(xgbr,  # k_features=(min_f, max_f),
-                                k_features="parsimonious", forward=True, floating=False,
-                                verbose=2, scoring="neg_mean_squared_error", cv=3)
-sfs = sfs.fit(df_TT_features, df_TT["CV"])
-# result summary
-df_res_sfs = pd.DataFrame.from_dict(sfs.get_metric_dict()).T
-selected_features = sfs.k_feature_idx_
-
-pipe = Pipeline([('sfs', sfs),
-                 ('xgb', xgbr)])
-# adapt parameters for clf
-param_grid = {f"xgb__{f}":value for f, value in xs.xgb_tiny.items()}
-gs = GridSearchCV(estimator=pipe, param_grid=param_grid, scoring='mean_squared_error', n_jobs=1,
-                  cv=3, iid=True, refit=False)
-gs = gs.fit(df_TT_features, df_TT["CV"])
-for i in range(len(gs.cv_results_['params'])):
-    print(gs.cv_results_['params'][i], 'test acc.:', gs.cv_results_['mean_test_score'][i])
-print("Best parameters via GridSearch", gs.best_params_)
+cv_predictions = get_cv_predictions(df_TT_features_val, df_TT_val["CV"],
+                                    df_DX_features_val, df_DX_val["CV"], xgbr_gs)
+sns.jointplot(x="Predicted CV", y="Observed CV", hue="Type", data=cv_predictions)
+plt.show()

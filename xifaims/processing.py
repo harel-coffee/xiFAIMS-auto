@@ -6,7 +6,57 @@ Created on Wed Oct 14 21:55:31 2020
 import re
 import numpy as np
 import pickle
+import pandas as pd
 import os
+from xifaims import features as xf
+
+
+def process_csms(infile_loc, config):
+    """
+    Read inputfile, remove non-unique ids and split data
+    """
+    # read file and annotate CV
+    df = pd.read_csv(infile_loc)
+
+    # set cv
+    df["CV"] = - df["run"].apply(get_faims_cv)
+
+    # remove non-unique
+    df = preprocess_nonunique(df)
+    # split into targets and decoys
+    df_TT, df_DX = split_target_decoys(df)
+
+    # filter by charge
+    return charge_filter(df_TT, config["charge"]), charge_filter(df_DX, config["charge"])
+
+
+def process_features(df_TT, df_DX, one_hot, config):
+    """
+    Process the splitted dataframes for TTs and DDS and add features for both dataframes.
+
+    df_TT: df, TTs
+    df_DX: df, DXs
+    one_hot: bool, if one hot encoding for the charge should be used
+    config: dic, config dict, used for including / excluding features
+    """
+    tmp_config = {i: j for i, j in config.items()}
+    # compute features
+    # here it is possible to adjust the charge coding either as one-hot or continous feature
+    # drop_features = ["proline", "DE", "KR", "log10mass", "Glycine"]
+    df_TT_features = xf.compute_features(df_TT, onehot=one_hot).drop(tmp_config["exclude"], axis=1)
+    df_DX_features = xf.compute_features(df_DX, onehot=one_hot).drop(tmp_config["exclude"], axis=1)
+
+    # only filter if include is specified, else just take all columns
+    if not one_hot:
+        charges = [f"charge_{d}" for d in np.arange(2, 9)]
+        tmp_config["include"] = [i for i in config["include"] if i not in charges]
+        tmp_config["include"].append("p.charge")
+
+    # if whielists are used to include features, filter the feature df here
+    if len(tmp_config["include"]) > 1:
+        df_TT_features = df_TT_features[tmp_config["include"]]
+        df_DX_features = df_DX_features[tmp_config["include"]]
+    return df_TT_features, df_DX_features
 
 
 def get_faims_cv(run, acq="LS"):
