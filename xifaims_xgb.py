@@ -1,10 +1,12 @@
 import argparse
 import os
 import pathlib
+# import matplotlib.pyplot as plt
+import pickle
+import sys
 
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import xgboost
 import yaml
 from mlxtend.feature_selection import SequentialFeatureSelector as SFS
@@ -12,12 +14,10 @@ from scipy.stats import pearsonr
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.pipeline import Pipeline
-import matplotlib.pyplot as plt
-import pickle
 
+from xifaims import parameters as xs
 # from sklearn.feature_selection import RFECV
 from xifaims import processing as xp
-from xifaims import parameters as xs
 
 
 def feature_hyperparameter_optimization(df_TT_features_train, df_TT_y):
@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
     if args["one_hot"] + args["cont"] == 2:
         print("error, charge cannot be one_hot and continous encoded at the same time.")
-        return(0)
+        sys.exit()
 
     if args["one_hot"]:
         one_hot = args["one_hot"]
