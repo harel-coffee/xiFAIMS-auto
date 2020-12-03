@@ -184,3 +184,5 @@ if __name__ == "__main__":
     fax = sns.jointplot(x="observed", y="predictions", hue="Split", data=df_predictions,
                         marker="+", s=75)
     plt.show()
+    print("Results written to: {}".format(args["output"]))
+    print(args)
