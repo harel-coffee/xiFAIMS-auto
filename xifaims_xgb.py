@@ -67,7 +67,7 @@ if __name__ == "__main__":
     # config_loc = "parameters/faims_structure_selection.yaml"
     # config_loc = "parameters/faims_all.yaml"
     # one_hot = False
-    # --one_hot -o results/dev_new/ -c "parameters/faims_all.yaml" --average --name 8PM4PM --infile "data/combined_8PMLunique_4PMLS_nonu.csv"
+    # --one_hot -o results/dev_new/ -c "parameters/faims_all.yaml" --average --name 8PM4PM --infile "data/combined_8PMLunique_4PMLS_nonu.csv" --jobs 8
     parser = argparse.ArgumentParser(description='Train XGBoost on CLMS data for FAIMS prediction.')
     parser.add_argument('--infile', type=pathlib.Path, required=True,
                         help='CSM data.')
@@ -86,6 +86,9 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--name', default='config', action="store",
                         help='Config file.')
 
+    parser.add_argument('-j', '--jobs', default=-1, action="store",
+                        help='Config file.')
+
     print(parser.parse_args())
     args = parser.parse_args().__dict__
     # %%
@@ -93,7 +96,7 @@ if __name__ == "__main__":
         str(args["infile"]).replace(".csv", ""))
     config = yaml.load(open(args["config"]), Loader=yaml.FullLoader)
     config["grid"] = "small"
-    config["jobs"] = -1
+    config["jobs"] = int(args["jobs"])
     print(config)
     dir_res = os.path.join(args["output"], prefix)
     if not os.path.exists(dir_res):
