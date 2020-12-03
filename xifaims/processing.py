@@ -22,12 +22,13 @@ def process_csms(infile_loc, config):
     df["CV"] = - df["run"].apply(get_faims_cv)
 
     # remove non-unique
-    df = preprocess_nonunique(df)
+    df_unique, df_nonunique = preprocess_nonunique(df)
     # split into targets and decoys
-    df_TT, df_DX = split_target_decoys(df)
+    df_TT, df_DX = split_target_decoys(df_unique)
 
     # filter by charge
-    return charge_filter(df_TT, config["charge"]), charge_filter(df_DX, config["charge"])
+    return charge_filter(df_TT, config["charge"]), charge_filter(df_DX, config["charge"]), \
+           df_unique, df_nonunique
 
 
 def process_features(df_TT, df_DX, one_hot, config):
@@ -112,9 +113,10 @@ def preprocess_nonunique(df_psms):
 
     # df_psms_unique = df_psms.groupby(grp_cols, as_index=False).agg(param)
     # print("aggregated psms: ", df_psms_unique.shape)
+    df_psms["mCV"] = df_psms.groupby(grp_cols)['CV'].transform('mean')
     df_psms_unique = df_psms.drop_duplicates(grp_cols, keep="first")
     print("unique: ", df_psms_unique.shape)
-    return df_psms_unique
+    return df_psms_unique, df_psms
 
 
 def split_target_decoys(df_psms, frac=1, random_state=42):
