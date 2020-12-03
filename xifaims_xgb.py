@@ -17,6 +17,7 @@ import pickle
 
 # from sklearn.feature_selection import RFECV
 from xifaims import processing as xp
+from xifaims import parameters as xs
 
 
 def feature_hyperparameter_optimization(df_TT_features_train, df_TT_y):
@@ -38,8 +39,8 @@ def feature_hyperparameter_optimization(df_TT_features_train, df_TT_y):
     # selector = RFECV(xgbr, step=1, cv=3, verbose=1)
     pipe = Pipeline([('sfs', selector), ('xgb', xgbr)])
     # adapt parameters for clf
-    # param_grid = {f"xgb__{f}": value for f, value in xs.xgb_tiny.items()}
-    param_grid = {f"xgb__{f}": value for f, value in {"n_estimators": [10, 50]}.items()}
+    param_grid = {f"xgb__{f}": value for f, value in xs.xgb_large.items()}
+    #param_grid = {f"xgb__{f}": value for f, value in {"n_estimators": [10, 50]}.items()}
     gs = GridSearchCV(estimator=pipe, param_grid=param_grid, scoring='neg_mean_squared_error',
                       n_jobs=1, cv=3, refit=False, verbose=2)
     gs = gs.fit(df_TT_features_train, df_TT_y)
@@ -95,16 +96,15 @@ if __name__ == "__main__":
     prefix = os.path.basename(args["config"].split(".")[0]) + "-" + os.path.basename(
         str(args["infile"]).replace(".csv", ""))
     config = yaml.load(open(args["config"]), Loader=yaml.FullLoader)
-    config["grid"] = "small"
     config["jobs"] = int(args["jobs"])
     print(config)
     dir_res = os.path.join(args["output"], prefix)
     if not os.path.exists(dir_res):
         os.makedirs(dir_res)
 
-    # if args["one_hot"] + args["cont"] == 2:
-    #     print("error, charge cannot be one_hot and continous encoded at the same time.")
-    #     return (0)
+    if args["one_hot"] + args["cont"] == 2:
+        print("error, charge cannot be one_hot and continous encoded at the same time.")
+        return(0)
 
     if args["one_hot"]:
         one_hot = args["one_hot"]
@@ -184,8 +184,8 @@ if __name__ == "__main__":
     # 4) plot shap interaction plot
     # 5) plot decoy
     #%%
-    fax = sns.jointplot(x="observed", y="predictions", hue="Split", data=df_predictions,
-                        marker="+", s=75)
-    plt.show()
+    # fax = sns.jointplot(x="observed", y="predictions", hue="Split", data=df_predictions,
+    #                     marker="+", s=75)
+    # plt.show()
     print("Results written to: {}".format(args["output"]))
     print(args)
