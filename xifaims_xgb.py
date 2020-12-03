@@ -75,8 +75,11 @@ if __name__ == "__main__":
 
     parser.add_argument('-e', '--one_hot', dest='one_hot', action='store_true',
                         help='Uses 1-hot encoding for charge state.')
-    parser.add_argument('-n', '--continous', dest='cont', action='store_true', default=False,
+    parser.add_argument('-n', '--continuous', dest='cont', action='store_true', default=False,
                         help='Uses continuous encoding for charge state.')
+
+    parser.add_argument('-s', '--sample', dest='cont', action='store_true', default=False,
+                        help='Sample 10 columns for testing.')
 
     parser.add_argument('-o', '--output', default='outdir', action="store",
                         help='Output directory to store results.')
@@ -119,7 +122,12 @@ if __name__ == "__main__":
     # input data
     df_TT, df_DX, df_unique, df_nonunique = xp.process_csms(args["infile"], config)
     df_TT_features, df_DX_features = xp.process_features(df_TT, df_DX, one_hot, config)
-    col = df_TT_features.sample(10, axis=1).columns
+
+    if sample:
+        col = df_TT_features.sample(10, axis=1).columns
+    else:
+        col = df_TT_features.columns
+
     # get train and validation data
     training_idx, validation_idx = train_test_split(df_TT.index, test_size=0.2)
     df_TT_train, df_TT_val = df_TT.loc[training_idx], df_TT.loc[validation_idx]
@@ -134,6 +142,7 @@ if __name__ == "__main__":
     # train again on all train data and predict test data
     xgbr = xgboost.XGBRegressor(**results_dic["best_params_gs"])
     xgbr.fit(df_TT_features_train[results_dic["best_features_gs"].values], df_TT_train[ycol])
+
     train_predictions = xgbr.predict(df_TT_features_train[results_dic["best_features_gs"].values])
     val_predictions = xgbr.predict(df_TT_features_val[results_dic["best_features_gs"].values])
     DX_predictions = xgbr.predict(df_DX_features[results_dic["best_features_gs"].values])
