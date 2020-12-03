@@ -78,7 +78,7 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--continuous', dest='cont', action='store_true', default=False,
                         help='Uses continuous encoding for charge state.')
 
-    parser.add_argument('-s', '--sample', dest='cont', action='store_true', default=False,
+    parser.add_argument('-s', '--sample', dest='sample', action='store_true', default=False,
                         help='Sample 10 columns for testing.')
 
     parser.add_argument('-o', '--output', default='outdir', action="store",
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     df_TT, df_DX, df_unique, df_nonunique = xp.process_csms(args["infile"], config)
     df_TT_features, df_DX_features = xp.process_features(df_TT, df_DX, one_hot, config)
 
-    if sample:
+    if args["sample"]:
         col = df_TT_features.sample(10, axis=1).columns
     else:
         col = df_TT_features.columns
