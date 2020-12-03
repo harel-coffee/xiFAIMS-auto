@@ -17,7 +17,8 @@ xgb_large = {'n_estimators': [20, 50, 100],
              'subsample': [0.8, 1.0],
              'colsample_bytree': [0.8, 1.0],
              'max_depth': [3, 4, 5],
-             'learning_rate': [0.01, 0.1, 0.3]}
+             'learning_rate': [0.01, 0.1, 0.3],
+             'nthread': [1]}
 
 xgb_huge = {'n_estimators': [30, 50, 100],
              'max_depth': [3, 5, 7, 9],
