@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-e', '--one_hot', dest='one_hot', action='store_true',
                         help='Uses 1-hot encoding for charge state.')
-    parser.add_argument('-n', '--continous', dest='cont', action='store_false',
+    parser.add_argument('-n', '--continous', dest='cont', action='store_true', default=False,
                         help='Uses continuous encoding for charge state.')
 
     parser.add_argument('-o', '--output', default='outdir', action="store",
