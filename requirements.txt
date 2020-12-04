@@ -1,0 +1,16 @@
+seaborn
+numpy
+pandas
+scikit-learn
+shap
+tqdm
+matplotlib
+scipy
+xgboost
+mlxtend
+tensorflow
+pickle5
+Pyyaml
+statannot
+#!pip install git+git://github.com/SylwiaOliwia2/xgboost-AutoTune@choose-params
+#!pip install pandas --upgrade
