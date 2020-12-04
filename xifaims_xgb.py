@@ -53,9 +53,8 @@ def feature_hyperparameter_optimization(df_TT_features_train, df_TT_y, grid):
     pipe.set_params(**gs.best_params_).fit(df_TT_features_train, df_TT_y)
     best_features = df_TT_features_train.columns[list(pipe.steps[0][1].k_feature_idx_)]
     summary_df = pd.DataFrame(gs.cv_results_)
-    best_params = gs.best_params_
     res_dic = {"best_features_gs": best_features, "summary_gs": summary_df,
-               "best_params_gs": best_params}
+               "best_params_gs": {i.replace("xgb__", ""): j for i, j in gs.best_params_.items()}}
     return res_dic
 
 
@@ -69,6 +68,7 @@ if __name__ == "__main__":
     # config_loc = "parameters/faims_all.yaml"
     # one_hot = False
     # --one_hot -o results/dev_new/ -c "parameters/faims_all.yaml" --average --name 8PM4PM --infile "data/combined_8PMLunique_4PMLS_nonu.csv" --jobs 8
+    # --xgb tiny -s -o results/dev_new/ -c "parameters/faims_all.yaml" --average --name 8PM4PM --infile "data/combined_8PMLunique_4PMLS_nonu.csv"
     parser = argparse.ArgumentParser(description='Train XGBoost on CLMS data for FAIMS prediction.')
     parser.add_argument('--infile', type=pathlib.Path, required=True,
                         help='CSM data.')
@@ -128,8 +128,16 @@ if __name__ == "__main__":
         ycol = "CV"
     # %% real processing
     # input data
-    df_TT, df_DX, df_unique, df_nonunique = xp.process_csms(args["infile"], config)
-    df_TT_features, df_DX_features = xp.process_features(df_TT, df_DX, one_hot, config)
+    df_unique, df_nonunique = xp.process_csms(args["infile"], config)
+    df_features = xp.process_features(df_unique, one_hot, config)
+
+    df_TT, df_DX = df_unique[df_unique.isTT == True], df_unique[df_unique.isTT == False]
+    df_TT = xp.charge_filter(df_TT, config["charge"])
+    df_DX = xp.charge_filter(df_DX, config["charge"])
+    # split into targets and decoys
+
+    df_TT_features = df_features.loc[df_TT.index]
+    df_DX_features = df_features.loc[df_DX.index]
 
     if args["sample"]:
         col = df_TT_features.sample(10, axis=1).columns

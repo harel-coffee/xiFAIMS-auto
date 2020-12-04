@@ -17,21 +17,14 @@ def process_csms(infile_loc, config):
     """
     # read file and annotate CV
     df = pd.read_csv(infile_loc)
-
     # set cv
     df["CV"] = - df["run"].apply(get_faims_cv)
-
-    # remove non-unique
-    df_unique, df_nonunique = preprocess_nonunique(df)
-    # split into targets and decoys
-    df_TT, df_DX = split_target_decoys(df_unique)
-
     # filter by charge
-    return charge_filter(df_TT, config["charge"]), charge_filter(df_DX, config["charge"]), \
-           df_unique, df_nonunique
+    # df_unique, df_nonunique =
+    return preprocess_nonunique(df)
 
 
-def process_features(df_TT, df_DX, one_hot, config):
+def process_features(df_TT, one_hot, config):
     """
     Process the splitted dataframes for TTs and DDS and add features for both dataframes.
 
@@ -44,8 +37,7 @@ def process_features(df_TT, df_DX, one_hot, config):
     # compute features
     # here it is possible to adjust the charge coding either as one-hot or continous feature
     # drop_features = ["proline", "DE", "KR", "log10mass", "Glycine"]
-    df_TT_features = xf.compute_features(df_TT, onehot=one_hot).drop(tmp_config["exclude"], axis=1)
-    df_DX_features = xf.compute_features(df_DX, onehot=one_hot).drop(tmp_config["exclude"], axis=1)
+    df_features = xf.compute_features(df_TT, onehot=one_hot).drop(tmp_config["exclude"], axis=1)
 
     # only filter if include is specified, else just take all columns
     if not one_hot:
@@ -55,9 +47,8 @@ def process_features(df_TT, df_DX, one_hot, config):
 
     # if whielists are used to include features, filter the feature df here
     if len(tmp_config["include"]) > 1:
-        df_TT_features = df_TT_features[tmp_config["include"]]
-        df_DX_features = df_DX_features[tmp_config["include"]]
-    return df_TT_features, df_DX_features
+        df_features = df_features[tmp_config["include"]]
+    return df_features
 
 
 def get_faims_cv(run, acq="LS"):
@@ -143,7 +134,7 @@ def split_target_decoys(df_psms, frac=1, random_state=42):
 
     df_DX = df_psms[~df_psms.isTT]
     df_DX = df_DX.reset_index(drop=True)
-    return(df_TT, df_DX)
+    return df_TT, df_DX
 
 def store_for_shap(df_TT, df_TT_features, df_DX, df_DX_features, classifier, path="", prefix=""):
     all_objs = {"TT": df_TT,
