@@ -20,7 +20,7 @@ from xifaims import parameters as xs
 from xifaims import processing as xp
 
 
-def feature_hyperparameter_optimization(df_TT_features_train, df_TT_y):
+def feature_hyperparameter_optimization(df_TT_features_train, df_TT_y, grid):
     """
     Run feature selectiona and parametergridsearch on  the training data. Use
     3 fold crossvalidation for both.
@@ -39,10 +39,10 @@ def feature_hyperparameter_optimization(df_TT_features_train, df_TT_y):
     # selector = RFECV(xgbr, step=1, cv=3, verbose=1)
     pipe = Pipeline([('sfs', selector), ('xgb', xgbr)])
     # adapt parameters for clf
-    param_grid = {f"xgb__{f}": value for f, value in xs.xgb_small.items()}
+    param_grid = {f"xgb__{f}": value for f, value in xs.xgb_params[grid].items()}
     #param_grid = {f"xgb__{f}": value for f, value in {"n_estimators": [10, 50]}.items()}
     gs = GridSearchCV(estimator=pipe, param_grid=param_grid, scoring='neg_mean_squared_error',
-                      n_jobs=-1, cv=3, refit=False, verbose=2)
+                      n_jobs=-1, cv=3, refit=False, verbose=3)
     gs = gs.fit(df_TT_features_train, df_TT_y)
 
     # print("Best parameters via GridSearch", gs.best_params_)
@@ -73,25 +73,33 @@ if __name__ == "__main__":
     parser.add_argument('--infile', type=pathlib.Path, required=True,
                         help='CSM data.')
 
+    # options
     parser.add_argument('-e', '--one_hot', dest='one_hot', action='store_true',
                         help='Uses 1-hot encoding for charge state.')
     parser.add_argument('-n', '--continuous', dest='cont', action='store_true', default=False,
                         help='Uses continuous encoding for charge state.')
+    parser.add_argument('-a', '--average', dest='average', action="store_true",
+                        help='If set CV values are averaged for redundant CSMs. (pep1, pep2, z')
 
+    parser.add_argument('-x', '--xgb', default='small', action="store",
+                        help='XGB parameter grid. One of tiny, small, large, huge.')
+
+    # debug testing
     parser.add_argument('-s', '--sample', dest='sample', action='store_true', default=False,
                         help='Sample 10 columns for testing.')
 
+    # input / output
     parser.add_argument('-o', '--output', default='outdir', action="store",
                         help='Output directory to store results.')
+
     parser.add_argument('-c', '--config', default='config', action="store",
                         help='Config file.')
-    parser.add_argument('-a', '--average', dest='average', action="store_true",
-                        help='If set CV values are averaged for redundant CSMs. (pep1, pep2, z')
+
     parser.add_argument('-m', '--name', default='config', action="store",
-                        help='Config file.')
+                        help='Basename that is used for storage.')
 
     parser.add_argument('-j', '--jobs', default=-1, action="store",
-                        help='Config file.')
+                        help='Number of jobs to use during grid search.')
 
     print(parser.parse_args())
     args = parser.parse_args().__dict__
@@ -135,7 +143,8 @@ if __name__ == "__main__":
                                                df_TT_features.loc[validation_idx]
 
     # get results
-    results_dic = feature_hyperparameter_optimization(df_TT_features_train[col], df_TT_train[ycol])
+    results_dic = feature_hyperparameter_optimization(df_TT_features_train[col], df_TT_train[ycol],
+                                                      grid=args["xgb"])
     results_dic["xifaims_params"] = args
     results_dic["xifaims_config"] = config
 
