@@ -35,14 +35,14 @@ def feature_hyperparameter_optimization(df_TT_features_train, df_TT_y):
 
     # %% this is the complete pipeline - feature selection and parameter optimization
     selector = SFS(xgbr, k_features="parsimonious", forward=True, floating=False,
-                   verbose=1, scoring="neg_mean_squared_error", cv=3)
+                   verbose=0, scoring="neg_mean_squared_error", cv=3)
     # selector = RFECV(xgbr, step=1, cv=3, verbose=1)
     pipe = Pipeline([('sfs', selector), ('xgb', xgbr)])
     # adapt parameters for clf
     param_grid = {f"xgb__{f}": value for f, value in xs.xgb_large.items()}
     #param_grid = {f"xgb__{f}": value for f, value in {"n_estimators": [10, 50]}.items()}
     gs = GridSearchCV(estimator=pipe, param_grid=param_grid, scoring='neg_mean_squared_error',
-                      n_jobs=1, cv=3, refit=False, verbose=1)
+                      n_jobs=-1, cv=3, refit=False, verbose=2)
     gs = gs.fit(df_TT_features_train, df_TT_y)
 
     # print("Best parameters via GridSearch", gs.best_params_)
