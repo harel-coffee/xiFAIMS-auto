@@ -153,6 +153,7 @@ if __name__ == "__main__":
     # get results
     results_dic = feature_hyperparameter_optimization(df_TT_features_train[col], df_TT_train[ycol],
                                                       grid=args["xgb"])
+    args["infile"] = str(args["infile"])
     results_dic["xifaims_params"] = args
     results_dic["xifaims_config"] = config
 
