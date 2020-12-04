@@ -42,7 +42,7 @@ def feature_hyperparameter_optimization(df_TT_features_train, df_TT_y, grid):
     param_grid = {f"xgb__{f}": value for f, value in xs.xgb_params[grid].items()}
     #param_grid = {f"xgb__{f}": value for f, value in {"n_estimators": [10, 50]}.items()}
     gs = GridSearchCV(estimator=pipe, param_grid=param_grid, scoring='neg_mean_squared_error',
-                      n_jobs=-1, cv=3, refit=False, verbose=3)
+                      n_jobs=-1, cv=3, refit=False, verbose=3, return_train_score=True)
     gs = gs.fit(df_TT_features_train, df_TT_y)
 
     # print("Best parameters via GridSearch", gs.best_params_)
