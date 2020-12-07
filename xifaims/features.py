@@ -79,6 +79,11 @@ def compute_features(df, onehot=True):
     df_features["mass"] = df["exp mass"]
     df_features["log10mass"] = np.log10(df["exp mass"])
 
+    # modifications
+    df_features["loop"] = df["seq1seq2"].str.contains("loop")
+    df_features["oh"] = df["seq1seq2"].str.contains("oh")
+    df_features["nh2"] = df["seq1seq2"].str.contains("nh2")
+
     if onehot:
         ohc = pd.get_dummies(df["exp charge"])
         ohc.columns = ["charge_" + str(i) for i in ohc.columns]

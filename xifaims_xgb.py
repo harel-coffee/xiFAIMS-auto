@@ -16,11 +16,11 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.pipeline import Pipeline
 
 from xifaims import parameters as xs
-# from sklearn.feature_selection import RFECV
+from sklearn.feature_selection import RFECV
 from xifaims import processing as xp
 
 
-def feature_hyperparameter_optimization(df_TT_features_train, df_TT_y, grid):
+def feature_hyperparameter_optimization(df_TT_features_train, df_TT_y, grid, feature="SSF"):
     """
     Run feature selectiona and parametergridsearch on  the training data. Use
     3 fold crossvalidation for both.
@@ -33,11 +33,23 @@ def feature_hyperparameter_optimization(df_TT_features_train, df_TT_y, grid):
     """
     xgbr = xgboost.XGBRegressor()
 
-    # %% this is the complete pipeline - feature selection and parameter optimization
-    selector = SFS(xgbr, k_features="parsimonious", forward=True, floating=False,
-                   verbose=0, scoring="neg_mean_squared_error", cv=3)
-    # selector = RFECV(xgbr, step=1, cv=3, verbose=1)
-    pipe = Pipeline([('sfs', selector), ('xgb', xgbr)])
+    # use the parameteized feature selection technique
+    if feature == "SFS":
+        # %% this is the complete pipeline - feature selection and parameter optimization
+        selector = SFS(xgbr, k_features="parsimonious", forward=True, floating=False,
+                       verbose=0, scoring="neg_mean_squared_error", cv=3)
+        # selector = RFECV(xgbr, step=1, cv=3, verbose=1)
+        pipe = Pipeline([('sfs', selector), ('xgb', xgbr)])
+
+    elif feature == "RFECV":
+        # %% this is the complete pipeline - feature selection and parameter optimization
+        selector = RFECV(xgbr, min_features_to_select=5, verbose=0,
+                         scoring="neg_mean_squared_error", cv=3)
+        pipe = Pipeline([('rfecv', selector), ('xgb', xgbr)])
+
+    elif feature.lower() == "none":
+        pipe = Pipeline([('xgb', xgbr)])
+
     # adapt parameters for clf
     param_grid = {f"xgb__{f}": value for f, value in xs.xgb_params[grid].items()}
     #param_grid = {f"xgb__{f}": value for f, value in {"n_estimators": [10, 50]}.items()}
@@ -45,13 +57,19 @@ def feature_hyperparameter_optimization(df_TT_features_train, df_TT_y, grid):
                       n_jobs=-1, cv=3, refit=False, verbose=3, return_train_score=True)
     gs = gs.fit(df_TT_features_train, df_TT_y)
 
-    # print("Best parameters via GridSearch", gs.best_params_)
-    # print('Best features:', gs.best_estimator_.steps[0][1].k_feature_idx_)
-
     # %% refit the estimator with the best parameters
     # apply again the feature selection to avoid calling refit in the grid search above
-    pipe.set_params(**gs.best_params_).fit(df_TT_features_train, df_TT_y)
-    best_features = df_TT_features_train.columns[list(pipe.steps[0][1].k_feature_idx_)]
+    pipe = pipe.set_params(**gs.best_params_).fit(df_TT_features_train, df_TT_y)
+
+    if feature == "SFS":
+        best_features = df_TT_features_train.columns[list(pipe.steps[0][1].k_feature_idx_)]
+
+    elif feature == "RFECV":
+        best_features = df_TT_features_train.columns[pipe.steps[0][1]._get_support_mask()]
+
+    elif feature.lower() == "none":
+        best_features = df_TT_features_train.columns
+
     summary_df = pd.DataFrame(gs.cv_results_)
     res_dic = {"best_features_gs": best_features, "summary_gs": summary_df,
                "best_params_gs": {i.replace("xgb__", ""): j for i, j in gs.best_params_.items()}}
@@ -69,6 +87,9 @@ if __name__ == "__main__":
     # one_hot = False
     # --one_hot -o results/dev_new/ -c "parameters/faims_all.yaml" --average --name 8PM4PM --infile "data/combined_8PMLunique_4PMLS_nonu.csv" --jobs 8
     # --xgb tiny -s -o results/dev_new/ -c "parameters/faims_all.yaml" --average --name 8PM4PM --infile "data/combined_8PMLunique_4PMLS_nonu.csv"
+    #--xgb tiny -s -o results/dev_new/ -c "parameters/faims_all.yaml" --average --name 8PM4PM --infile "data/combined_8PMLunique_4PMLS_nonu.csv" --feature "none"
+    # --xgb tiny -s -o results/dev_new/ -c "parameters/faims_all.yaml" --average --name 8PM4PM --infile "data/combined_8PMLunique_4PMLS_nonu.csv" --feature "RFECV"
+
     parser = argparse.ArgumentParser(description='Train XGBoost on CLMS data for FAIMS prediction.')
     parser.add_argument('--infile', type=pathlib.Path, required=True,
                         help='CSM data.')
@@ -83,6 +104,9 @@ if __name__ == "__main__":
 
     parser.add_argument('-x', '--xgb', default='small', action="store",
                         help='XGB parameter grid. One of tiny, small, large, huge.')
+
+    parser.add_argument('-f', '--feature', default='SSF', action="store",
+                        help='Feature selection method, one of (SSF, RFECV, None).')
 
     # debug testing
     parser.add_argument('-s', '--sample', dest='sample', action='store_true', default=False,
@@ -152,7 +176,7 @@ if __name__ == "__main__":
 
     # get results
     results_dic = feature_hyperparameter_optimization(df_TT_features_train[col], df_TT_train[ycol],
-                                                      grid=args["xgb"])
+                                                      grid=args["xgb"], feature=args["feature"])
     args["infile"] = str(args["infile"])
     results_dic["xifaims_params"] = args
     results_dic["xifaims_config"] = config
@@ -195,9 +219,9 @@ if __name__ == "__main__":
     print(results_dic.keys())
     results_dic["xgb"] = xgbr
     results_dic["predictions_df"] = df_predictions
-    results_dic["data"] = {"TT_train": (df_TT_train, df_TT_features_train),
-                           "TT_val": (df_TT_val, df_TT_features_val),
-                           "DX": (df_DX, df_DX_features)}
+    results_dic["data"] = {"TT_train": (df_TT_train, df_TT_features_train, train_predictions),
+                           "TT_val": (df_TT_val, df_TT_features_val, val_predictions),
+                           "DX": (df_DX, df_DX_features, DX_predictions)}
     results_dic["metrics"] = metrics_df.round(3)
     results_dic["df_unique"] = df_unique
     results_dic["df_nonunique"] = df_nonunique
