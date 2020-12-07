@@ -100,7 +100,7 @@ def compute_features(df, onehot=True):
     df_features["Glycine"] = df["seq1seq2"].str.count("G")
 
     # charge
-    df_features["charge_cmp"] = df["seq1seq2"].apply(get_electrochem_charge)
+    #df_features["charge_cmp"] = df["seq1seq2"].apply(get_electrochem_charge)
     
     # biopython
     df_features["helix"] = df["seq1seq2"].apply(get_structure_perc, args=("helix",))
