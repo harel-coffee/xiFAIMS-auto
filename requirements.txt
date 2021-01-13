@@ -12,5 +12,4 @@ tensorflow
 pickle5
 Pyyaml
 statannot
-#!pip install git+git://github.com/SylwiaOliwia2/xgboost-AutoTune@choose-params
-#!pip install pandas --upgrade
+git+git://github.com/SylwiaOliwia2/xgboost-AutoTune@choose-params
