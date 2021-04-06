@@ -1,0 +1,35 @@
+sven.giese@XXXX:~/projects/xiFAIMS$ pdsh -R ssh -w node-11 'cd $(pwd) && python xiFAIMS/xifaims_xgb.py --jobs 1 --xgb huge --name 8PM4PM_CO_NAVG_huge_nofeats --continuous --feature "none" -o xiFAIMS/results/ -c "xiFAIMS/parameters/faims_all.yaml" --infile "xiFAIMS/data/combined_8PMLunique_4PMLS_nonu.csv"'
+node-11: 2021-04-06 15:40:45.994892: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudart.so.10.1'; dlerror: libcudart.so.10.1: cannot open shared object file: No such file or directory
+node-11: 2021-04-06 15:40:45.994917: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+node-11: xiFAIMS/xifaims/features.py:71: SettingWithCopyWarning:
+node-11: A value is trying to be set on a copy of a slice from a DataFrame.
+node-11: Try using .loc[row_indexer,col_indexer] = value instead
+node-11:
+node-11: See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+node-11:   df["seq1seq2"] = df["PepSeq1"] + df["PepSeq2"]
+node-11: [Parallel(n_jobs=-1)]: Using backend LokyBackend with 72 concurrent workers.
+node-11: Namespace(average=False, config='xiFAIMS/parameters/faims_all.yaml', cont=True, feature='none', infile=PosixPath('xiFAIMS/data/combined_8PMLunique_4PMLS_nonu.csv'), jobs='1', name='8PM4PM_CO_NAVG_huge_nofeats', one_hot=False, output='xiFAIMS/results/', sample=False, xgb='huge')
+node-11: {'scale': True, 'nonunique': True, 'charge': 'all', 'prefix': 'all_features', 'jobs': 1, 'exclude': ['proline', 'DE', 'KR', 'log10mass', 'Glycine'], 'include': []}
+node-11: input psms:  (10119, 66)
+node-11: unique:  (4512, 67)
+node-11: Fitting 3 folds for each of 1152 candidates, totalling 3456 fits
+
+node-11: dict_keys(['best_features_gs', 'summary_gs', 'best_params_gs', 'xifaims_params', 'xifaims_config'])
+node-11: Train         3544
+node-11: Validation     887
+node-11: DX              81
+node-11: Name: filter_split, dtype: int64
+node-11:          r2  pearsonr       MAE        MSE       split
+node-11: 0  0.745462  0.874656  4.459339  32.798717       Train
+node-11: 1  0.538645  0.737883  6.543552  69.405016  Validation
+node-11: 2  0.380818  0.639956  5.776535  52.745134          DX
+node-11: Results written to: xiFAIMS/results/
+node-11: {'infile': 'xiFAIMS/data/combined_8PMLunique_4PMLS_nonu.csv', 'one_hot': False, 'cont': True, 'average': False, 'xgb': 'huge', 'feature': 'none', 'sample': False, 'output': 'xiFAIMS/results/', 'config': 'xiFAIMS/parameters/faims_all.yaml', 'name': '8PM4PM_CO_NAVG_huge_nofeats', 'jobs': '1'}
+node-11: [Parallel(n_jobs=-1)]: Done  56 tasks      | elapsed:  1.8min
+node-11: [Parallel(n_jobs=-1)]: Done 306 tasks      | elapsed:  1.9min
+node-11: [Parallel(n_jobs=-1)]: Done 656 tasks      | elapsed:  1.9min
+node-11: [Parallel(n_jobs=-1)]: Done 1106 tasks      | elapsed:  2.0min
+node-11: [Parallel(n_jobs=-1)]: Done 1656 tasks      | elapsed:  2.1min
+node-11: [Parallel(n_jobs=-1)]: Done 2306 tasks      | elapsed:  2.2min
+node-11: [Parallel(n_jobs=-1)]: Done 3056 tasks      | elapsed:  2.4min
+node-11: [Parallel(n_jobs=-1)]: Done 3456 out of 3456 | elapsed:  2.5min finished
