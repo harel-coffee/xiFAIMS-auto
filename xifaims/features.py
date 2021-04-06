@@ -80,9 +80,9 @@ def compute_features(df, onehot=True):
     df_features["log10mass"] = np.log10(df["exp mass"])
 
     # modifications
-    df_features["loop"] = df["seq1seq2"].str.contains("loop")
-    df_features["oh"] = df["seq1seq2"].str.contains("oh")
-    df_features["nh2"] = df["seq1seq2"].str.contains("nh2")
+    df_features["loop"] = df["seq1seq2"].str.count("loop")
+    df_features["oh"] = df["seq1seq2"].str.count("oh")
+    df_features["nh2"] = df["seq1seq2"].str.count("nh2")
 
     if onehot:
         ohc = pd.get_dummies(df["exp charge"])
@@ -112,10 +112,10 @@ def compute_features(df, onehot=True):
     seqs = [only_upper(i) for i in df["seq1seq2"]]
     glob = GlobalDescriptor(seqs)
 
-    glob.calculate_charge(ph=2.8, amide=True)
+    glob.calculate_charge(ph=2.8, amide=False)
     df_features["charge_glob"] = np.ravel(glob.descriptor)
 
-    glob.charge_density(ph=2.8, amide=True)
+    glob.charge_density(ph=2.8, amide=False)
     df_features["charge_density"] = np.ravel(glob.descriptor)
 
     glob.hydrophobic_ratio()
