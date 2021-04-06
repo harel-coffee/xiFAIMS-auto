@@ -6,8 +6,9 @@ Post-processing needs to be done.
 example:
 
 python xifaims_xgb.py --jobs 1 --xgb tiny --name 8PM4PM_CO_NAVG_tiny_nofeats --continuous --feature none -o results_2021  -c parameters/faims_all.yaml --infile data/combined_8PMLunique_4PMLS_nonu.csv
+
 """
-GRID = "tiny"
+GRID = "huge"
 
 rule run_xifaims:
     input:
