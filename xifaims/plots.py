@@ -170,3 +170,26 @@ def target_decoy_comparison(prediction_df):
     plt.savefig("notebooks/TT_TD_prediction_error_hist.png")
     plt.savefig("notebooks/TT_TD_prediction_error_hist.svg")
     plt.show()
+
+
+def plot_cv_results(cv_results, param_x, param_z, metric='mean_test_score'):
+    """
+    cv_results - cv_results_ attribute of a GridSearchCV instance (or similar)
+    param_x - name of grid search parameter to plot on x axis
+    param_z - name of grid search parameter to plot by line color
+    
+    
+    df_cv = data_dic["summary_gs"]
+    df_cv = df_cv.sort_values("rank_test_score", ascending=True)
+    df_cv.filter(regex="param|rank", axis=1).head(20)    
+    """
+    #cv_results = pd.DataFrame(cv_results)
+    col_x = 'param_' + param_x
+    col_z = 'param_' + param_z
+    fig, ax = plt.subplots(1, 1, figsize=(11, 8))
+    sns.pointplot(x=col_x, y=metric, hue=col_z, data=cv_results, ci=99, n_boot=64, ax=ax)
+    ax.set_title("CV Grid Search Results")
+    ax.set_xlabel(param_x)
+    ax.set_ylabel(metric)
+    ax.legend(title=param_z)
+    return fig

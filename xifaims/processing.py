@@ -19,6 +19,8 @@ def process_csms(infile_loc, config):
     df = pd.read_csv(infile_loc)
     # set cv
     df["CV"] = - df["run"].apply(get_faims_cv)
+    df = df.drop(df.filter(regex="Unnamed").columns, axis=1)
+    df = df.set_index("PSMID")
     # filter by charge
     # df_unique, df_nonunique =
     return preprocess_nonunique(df)
