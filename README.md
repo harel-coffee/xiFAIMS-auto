@@ -26,7 +26,7 @@ List of available modules:
 - minimize neg_mean_squared_error in sklearns gridsearch
 
 
-## command line arguments for xifaims_xgb
+## xifaims_xgb overview
 
 The main script that is executed via snakemake is **xifaims_xgb.py**. This file does the following
 
