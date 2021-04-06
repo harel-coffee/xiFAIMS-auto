@@ -206,8 +206,8 @@ if __name__ == "__main__":
     config["jobs"] = int(args["jobs"])
     print(config)
     dir_res = os.path.join(args["output"], prefix)
-    # if not os.path.exists(dir_res):
-    #     os.makedirs(dir_res)
+    if not os.path.exists(dir_res):
+        os.makedirs(dir_res)
 
     if args["one_hot"] + args["cont"] == 2:
         print("error, charge cannot be one_hot and continous encoded at the same time.")
