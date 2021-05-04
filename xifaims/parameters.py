@@ -30,4 +30,18 @@ xgb_huge = {'n_estimators': [50, 100],
             'colsample_bytree': [0.5, 0.8],
              'nthread': [1], 'seed': [42]}
 
-xgb_params = {"tiny": xgb_tiny, "small": xgb_small, "large": xgb_large, "huge": xgb_huge}
+
+xgb_really_huge = {'n_estimators': [50, 75, 100],
+                   'max_depth': [3, 7, 9],
+                   'min_child_weight': [0.1, 1, 5, 10],
+                   'learning_rate': [0.01, 0.1, 0.15, 0.3],
+                   'gamma': [0.0, 0.1, 0.5, 2, 5],
+                   'reg_alpha': [1e-2, 0.1, 1, 10, 100],
+                   'reg_lambda': [1e-2, 0.1, 1, 10, 100],
+                   'subsample': [0.2, 0.4, 0.5, 0.7, 0.8],
+                   'colsample_bytree': [0.2, 0.4, 0.5, 0.7, 0.8],
+                   'nthread': [1], 'seed': [42]}
+
+
+xgb_params = {"tiny": xgb_tiny, "small": xgb_small, "large": xgb_large, "huge": xgb_huge,
+              "really_huge": xgb_really_huge}
