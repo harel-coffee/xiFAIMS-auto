@@ -22,6 +22,8 @@ from sklearn.feature_selection import RFECV
 
 from xifaims import parameters as xs
 from xifaims import processing as xp
+from xifaims import __version__ as XV
+
 np.random.seed(42)
 
 
@@ -200,6 +202,7 @@ if __name__ == "__main__":
     print(parser.parse_args())
     args = parser.parse_args().__dict__
     # %%
+    print(f"Using xifaims_xgb version: {XV}")
     prefix = os.path.basename(args["config"].split(".")[0]) + "-" + os.path.basename(
         str(args["infile"]).replace(".csv", ""))
     config = yaml.load(open(args["config"]), Loader=yaml.FullLoader)
@@ -272,13 +275,13 @@ if __name__ == "__main__":
     df_predictions["observed"] = \
         np.concatenate([df_TT_train[ycol].values, df_TT_val[ycol].values, df_DX[ycol]])
     df_predictions["Split"] = \
-        np.repeat(["Train", "Test", "DX"], [len(train_predictions), 
+        np.repeat(["Train", "Test", "DX"], [len(train_predictions),
                                             len(val_predictions), len(DX_predictions)])
-    df_predictions.index = np.concatenate([df_TT_features_train.index, 
+    df_predictions.index = np.concatenate([df_TT_features_train.index,
                                            df_TT_features_val.index,
                                            df_DX_features.index])
     df_predictions.index.set_names("PSMID", inplace=True)
-    
+
     # metrics df
     metrics_df = pd.DataFrame()
     metrics_n = ["r2", "pearsonr", "MAE", "MSE"]

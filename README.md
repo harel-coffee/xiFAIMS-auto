@@ -1,14 +1,12 @@
 # xiFAIMS
-Module for analysis of crosslinking MS/FAIMS data.
+Modules for analysis of crosslinking MS/FAIMS data.
 
-To reproduce the analysis in the manuscript install the requirements from the pipefile and run:
+This repository supports the analysis in the following manuscript (TBD). The analysis 
+in the manuscript can partly be reproduced by first installing the requirements from the pipefile and running:
 
->snakemake -s .\run_xifaims.sn -j 8 --printshellcmds 
+>snakemake -s .\run_xifaims.smk -j 8 --printshellcmds 
 
 Then open the **xifaims_xgb_notebook** to generate the ML results.
-
-
-# dev notes
 
 ## Modules
 List of available modules:
@@ -51,11 +49,12 @@ the command line arguments can be retrieved by executing --help on the terminal.
 
 ## post optimization analysis
 
-Open the **xifaims_xgb_notebook** to "interactively" go through the results.
+Open the **xifaims_xgb_notebook** to interactively go through the results.
 
 # installation
-Clone this repo and then install via pip (pip install -e .). Make sure to install the dependencies,
-xirt etc.
+
+Clone this repo and then install via pip (pip install -e .). Make sure to install the dependencies
+from the Pipfile. We recommend to use pipenv for this.
 
 # Contributors
 - Sven Giese
